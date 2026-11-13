@@ -110,10 +110,11 @@
   #round .g{font-size:14px;font-weight:700;margin-bottom:4px}
   #round .g b{color:var(--accent)}
   .guests{display:flex;gap:6px}
-  .guest{flex:1;background:#f6f0e6;border-radius:8px;padding:4px 6px;line-height:1.3;display:grid;grid-template-columns:auto 1fr;column-gap:4px;align-items:center}
-  .guest .f{font-size:18px;grid-row:span 2}
-  .guest .n{font-weight:700;font-size:11px}
-  .guest .t{color:var(--sub);font-size:10px}
+  .guest{flex:1;min-width:0;background:#f6f0e6;padding:6px 4px 7px;line-height:1.3;display:flex;flex-direction:column;align-items:center;text-align:center;gap:2px}
+  .guest .f .pxface{width:32px;height:32px}
+  .guest .n small{display:block;font-size:9.5px;color:var(--sub);white-space:nowrap;font-weight:500}
+  .guest .n b{display:block;font-size:12px;white-space:nowrap;font-weight:800}
+  .guest .t{color:var(--sub);font-size:9.5px;word-break:keep-all;overflow-wrap:anywhere;margin-top:1px}
   .mark{font-weight:700;color:var(--ink)}
   .rev{display:flex;gap:8px;align-items:flex-start;background:#f6f0e6;border-radius:10px;padding:8px;margin:6px 0}
   .rev .f{font-size:24px;line-height:1}
@@ -264,7 +265,7 @@
     <canvas id="logo" width="272" height="152"></canvas>
     <div class="tt-card">
       <h3>■ 本日の営業について</h3>
-      <p>バイト初日、<wbr>高級レストラン<wbr>ワンオペ！？<wbr>もう<wbr>ありあわせで<wbr>作るしかない！</p>
+      <p>バイト初日、<wbr>高級レストラン<wbr><span style="white-space:nowrap">ワンオペ！？</span><wbr>もう<wbr>ありあわせで<wbr>作るしかない！</p>
       <h3>■ あそびかた</h3>
       <ol>
         <li>欲しい食材が排出口に<wbr>近づいたら、<wbr>ボタンを長押し。<wbr>押している間だけ<wbr>排出口が開きます。<wbr><em>余計なものも<wbr>一緒に<wbr>出てきます。</em></li>
@@ -1192,6 +1193,13 @@ const GUEST_POOL = [
   {face:'🔪', name:'旬にうるさい板前', tag:'季節の食材を重んじる', w:{season:3, harm:1, fit:1, portion:0.5}},
   {face:'👵', name:'近所のおばあちゃん', tag:'たいてい褒めてくれる', w:{harm:1, fit:1.5, genre:1, portion:1.5}, bonus:6},
 ];
+// お客さま欄の表示：肩書き（小さく）と呼び名（太字）を分け、特徴は語の切れ目で折り返す
+const GUEST_LABEL = {'老舗の料理評論家':['老舗の','料理評論家'], '原理主義の美食家':['原理主義の','美食家'], '成金社長':['成金','社長'],
+  '腹ペコの学生':['腹ペコの','学生'], '前衛アーティスト':['前衛','アーティスト'], '甘党のマダム':['甘党の','マダム'],
+  'コース構成マニア':['コース構成','マニア'], '旬にうるさい板前':['旬にうるさい','板前'], '近所のおばあちゃん':['近所の','おばあちゃん']};
+const GUEST_TAG_WRAP = {'老舗の料理評論家':'味のまとまりに<wbr>うるさい', '原理主義の美食家':'ジャンルに<wbr>厳格', '成金社長':'高級食材が<wbr>好き',
+  '腹ペコの学生':'量があれば<wbr>満足', '前衛アーティスト':'奇妙な皿ほど<wbr>喜ぶ', '甘党のマダム':'甘いものに<wbr>目がない',
+  'コース構成マニア':'流れを<wbr>重視', '旬にうるさい板前':'季節の食材を<wbr>重んじる', '近所のおばあちゃん':'たいてい<wbr>褒めてくれる'};
 const COMMENT = {
   harm:  [d=>`「${d}」は味がきちんとまとまっている。見事だ。`, d=>`「${d}」は悪くないが、もう一歩まとまりが欲しい。`, d=>`「${d}」は……味が喧嘩している。`],
   fit:   [d=>`この位置に「${d}」を出す判断、正しい。`, d=>`「${d}」は、コースのこの位置としては少し収まりが悪い。`, d=>`なぜここで「${d}」が出てくるのか。`],
@@ -2048,7 +2056,8 @@ function chipHTML(p){
 function renderRound(){
   document.getElementById('round').innerHTML =
     `<div class="g">本日のお題：<b>${genre.name}</b>　季節：<b>${ICON.seasonImg(season)}${season.name}</b></div><div class="guests">` +
-    guests.map(g => `<div class="guest"><div class="f">${ICON.faceImg(g, 1)}</div><div class="n">${g.name}</div><div class="t">${g.tag}</div></div>`).join('') + '</div>';
+    guests.map(g => { const [pre, noun] = GUEST_LABEL[g.name] || ['', g.name];
+      return `<div class="guest"><div class="f">${ICON.faceImg(g, 1)}</div><div class="n"><small>${pre}</small><b>${noun}</b></div><div class="t">${GUEST_TAG_WRAP[g.name] || g.tag}</div></div>`; }).join('') + '</div>';
 }
 function newRound(){ genre = GENRES[Math.floor(Math.random()*GENRES.length)]; season = SEASONS[Math.floor(Math.random()*SEASONS.length)]; pickGuests(); renderRound(); }
 
@@ -2291,16 +2300,23 @@ function serveDish(){
 window.__gameReset = () => { closeServe(); reset(); };
 // 点数（0〜100）を星1.0〜5.0（小数第1位）で表す
 const toStars = sc => Math.round((1 + clamp(sc) * 0.04) * 10) / 10;
-const STAR_IMG = (() => {
-  const rows = ["......k......",".....khk.....",".....khk.....","kkkkkyhykkkkk","kyhhyyyyyyyyk",".kyyyyyyyyyk.","..kyyyyyyyk..","...kyyyyyk...","..kyyykyyyk..","..kyyk.kyyk..",".kyyk...kyyk.",".kkk.....kkk."];
-  const mk = (pal) => { const c = document.createElement('canvas'); c.width = 13; c.height = 12; const g = c.getContext('2d');
-    rows.forEach((r, y) => [...r].forEach((ch, x) => { if (pal[ch]){ g.fillStyle = pal[ch]; g.fillRect(x, y, 1, 1); } })); return c.toDataURL(); };
-  try { return { on: mk({k:'#2b1d1a', y:'#f0c040', h:'#fff0a0'}), off: mk({k:'#b8ac98', y:'#e8e0d0', h:'#e8e0d0'}) }; } catch(_){ return {on:'', off:''}; }
-})();
-function starsHTML(sc, size){
-  const st = toStars(sc), w = Math.round(size * 13 / 12) + 2;
-  return `<span class="stars" style="width:${w*5}px;height:${size}px;background-image:url(${STAR_IMG.off});background-size:${w}px ${size}px">` +
-    `<span style="width:${st/5*100}%;background-image:url(${STAR_IMG.on});background-size:${w}px ${size}px"></span></span>`;
+const STAR_ROWS = ["......k......",".....khk.....",".....khk.....","kkkkkyhykkkkk","kyhhyyyyyyyyk",".kyyyyyyyyyk.","..kyyyyyyyk..","...kyyyyyk...","..kyyykyyyk..","..kyyk.kyyk..",".kyyk...kyyk.",".kkk.....kkk."];
+const starCache = {};
+// 星1つの絵（k＝画面上の倍率）。端末の解像度ぶん大きく描いておき、ぼやけないようにする
+function starImg(k, on){
+  const dpr = Math.max(1, Math.round(window.devicePixelRatio || 1)), s = k * dpr, key = s + (on ? 'on' : 'off');
+  if (starCache[key]) return starCache[key];
+  const pal = on ? {k:'#2b1d1a', y:'#f0c040', h:'#fff0a0'} : {k:'#b8ac98', y:'#e8e0d0', h:'#e8e0d0'};
+  try {
+    const c = document.createElement('canvas'); c.width = 14 * s; c.height = 12 * s; const g = c.getContext('2d');
+    STAR_ROWS.forEach((r, y) => [...r].forEach((ch, x) => { if (pal[ch]){ g.fillStyle = pal[ch]; g.fillRect(x*s, y*s, s, s); } }));
+    return starCache[key] = c.toDataURL();
+  } catch(_){ return ''; }
+}
+function starsHTML(sc, k){
+  const st = toStars(sc), w = 14 * k, h = 12 * k;
+  return `<span class="stars" style="width:${w*5}px;height:${h}px;background-image:url(${starImg(k, false)});background-size:${w}px ${h}px">` +
+    `<span style="width:${st/5*100}%;background-image:url(${starImg(k, true)});background-size:${w}px ${h}px"></span></span>`;
 }
 const GOOD_NOTE = /定番|らしい調理|取り合わせ|素材を活かした|が良い|引き立てる|締める/;
 function barRow(label, v){
@@ -2312,9 +2328,9 @@ function showFinal(){
   const targets = parts.filter(p => p.target), hit = targets.filter(p => p.out).length;
   openServe(`<div class="sv">
     <div class="res-head"><div class="rh-t">本日の評価</div><div class="rh-s">${genre.name}・${season.name}</div>
-      <div class="res-score">${starsHTML(R2.final, 30)}<b>${toStars(R2.final).toFixed(1)}</b></div></div>
+      <div class="res-score">${starsHTML(R2.final, 3)}<b>${toStars(R2.final).toFixed(1)}</b></div></div>
     <div class="res-h">■ お客さまの声</div>
-    <div class="res-guests">${R2.reviews.map(r => `<div class="rg">${ICON.faceImg(r.g, moodOf(r.score))}<div class="rg-n">${r.g.name}</div><div class="rg-sc">${starsHTML(r.score, 13)}<span>${toStars(r.score).toFixed(1)}</span></div><div class="rg-t">${r.text}</div></div>`).join('')}</div>
+    <div class="res-guests">${R2.reviews.map(r => `<div class="rg">${ICON.faceImg(r.g, moodOf(r.score))}<div class="rg-n">${r.g.name}</div><div class="rg-sc">${starsHTML(r.score, 1)}<span>${toStars(r.score).toFixed(1)}</span></div><div class="rg-t">${r.text}</div></div>`).join('')}</div>
     <div class="res-h">■ 本日のコース</div>
     ${SLOTS.map((g, j) => { const d = R2.dishes[j];
       return `<div class="rd"><canvas class="pxplate" id="resPlate${j}" width="52" height="52"></canvas><div>

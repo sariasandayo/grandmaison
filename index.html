@@ -71,9 +71,11 @@
   .rsub{font-size:11.5px;color:var(--sub);padding:2px 4px}
   .rok{font-size:12.5px;font-weight:700;color:#3d7a3a;background:#eef7ec;border-radius:8px;padding:6px 9px}
   .rbtn{text-align:left;border:1px solid #ecd28a;background:#fff8e6;border-radius:8px;padding:7px 9px;font-size:12.5px;font-weight:700;font-family:inherit;color:var(--ink);cursor:pointer}
-  .course{margin-top:12px;border-top:1px dashed var(--line);padding-top:8px}
-  .crow{display:flex;gap:8px;font-size:12px;padding:3px 0;color:#b3a99c}
-  .crow .cn{min-width:5.5em;font-weight:700;white-space:nowrap}
+  .course{margin-top:12px;border-top:1px dashed var(--line);padding-top:8px;display:grid;grid-template-columns:max-content minmax(0,1fr);column-gap:10px}
+  .crow{display:contents;font-size:12px;color:#b3a99c}
+  .crow > span{padding:3px 0;font-size:12px;line-height:1.5;border-bottom:1px dotted #e8e0d2}
+  .crow .cn{font-weight:700;white-space:nowrap}
+  .crow .cd{min-width:0}
   .crow.done{color:var(--ink)} .crow.now{color:var(--accent)}
   .dish{font-size:13px;font-weight:600;margin-top:6px;line-height:1.5}
   .dish.none{color:#b3a99c;font-weight:400}
@@ -234,6 +236,48 @@
   .res-score b{font-size:40px!important}
   .rg-sc{display:flex;flex-direction:column;align-items:flex-end;gap:2px;font-size:18px!important}
   .rg-sc span:last-child{line-height:1}
+
+  /* ===== レシピ帳 ===== */
+  .rb{padding-top:0!important}
+  .rb-head{position:sticky;top:0;z-index:2;background:var(--bg);padding:14px 2px 8px;margin:0 -2px 6px;box-shadow:0 2px 0 0 var(--line)}
+  .rb-close{font-family:inherit;font-size:13px;font-weight:700;background:#fff;color:var(--ink);border:0;padding:6px 14px;cursor:pointer;
+    box-shadow:0 -2px 0 0 var(--ink),0 2px 0 0 var(--ink),-2px 0 0 0 var(--ink),2px 0 0 0 var(--ink)}
+  .rb-search{position:relative;margin:10px 2px 8px}
+  .rb-search input{width:100%;box-sizing:border-box;font-family:inherit;font-size:16px;padding:9px 34px 9px 12px;border:0;background:#fff;color:var(--ink);border-radius:0;-webkit-appearance:none;appearance:none;
+    box-shadow:0 -2px 0 0 var(--ink),0 2px 0 0 var(--ink),-2px 0 0 0 var(--ink),2px 0 0 0 var(--ink)}
+  .rb-search input::-webkit-search-cancel-button{display:none}
+  .rb-search button{position:absolute;right:6px;top:50%;transform:translateY(-50%);border:0;background:#e8e0d2;color:var(--ink);width:24px;height:24px;font-size:15px;line-height:1;cursor:pointer;font-family:inherit}
+  .rb-tabs{gap:5px!important;margin:4px 2px 8px!important}
+  .rb-tab{padding:6px 2px!important;font-size:12px!important;font-weight:700;border:0!important;
+    box-shadow:0 -2px 0 0 var(--line),0 2px 0 0 var(--line),-2px 0 0 0 var(--line),2px 0 0 0 var(--line)}
+  .rb-tab.on{box-shadow:0 -2px 0 0 var(--ink),0 2px 0 0 var(--ink),-2px 0 0 0 var(--ink),2px 0 0 0 var(--ink)}
+  .rb-opts{display:flex;gap:8px;align-items:center;margin:0 2px}
+  .rb-mine{flex:1;font-family:inherit;font-size:12px;font-weight:700;border:0;background:#fff;color:var(--accent);padding:7px 6px;cursor:pointer;
+    box-shadow:0 -2px 0 0 var(--accent),0 2px 0 0 var(--accent),-2px 0 0 0 var(--accent),2px 0 0 0 var(--accent)}
+  .rb-mine.on{background:var(--accent);color:#fff}
+  .rb-opts select{margin-left:auto;font-family:inherit;font-size:12px;padding:6px 8px;border:0;background:#fff;color:var(--ink);border-radius:0;
+    box-shadow:0 -2px 0 0 var(--line),0 2px 0 0 var(--line),-2px 0 0 0 var(--line),2px 0 0 0 var(--line)}
+  .rb-opts select:disabled{opacity:.45}
+  .rb-count{font-size:11px;color:var(--sub);margin:8px 2px 0}
+  .rb-note{font-size:11px;color:var(--sub);margin:8px 2px 10px;word-break:keep-all;overflow-wrap:anywhere}
+  .rb-sec{font-size:13px;font-weight:800;color:#5a1e2a;margin:16px 2px 8px;padding-bottom:3px;border-bottom:2px solid #e8b84a;display:flex;justify-content:space-between}
+  .rb-sec span{font-size:11px;color:var(--sub);font-weight:500}
+  .rb-empty{text-align:center;color:var(--sub);font-size:13px;padding:30px 0}
+  .rc{margin:0 2px 10px!important}
+  .rc.focus{box-shadow:0 -3px 0 0 var(--accent),0 3px 0 0 var(--accent),-3px 0 0 0 var(--accent),3px 0 0 0 var(--accent)!important;background:#fff8ec}
+  .rc-n{gap:8px}
+  .rc-tags{display:flex;gap:6px;align-items:center;flex:none}
+  .rc-g{font-size:10px;font-weight:800;color:#fff;background:#5a1e2a;padding:1px 5px}
+  .rc-b{display:inline-block;font-size:10.5px;font-weight:700;color:var(--accent);margin-top:3px}
+  .rc-b.ok{color:#3d7a3a}
+  .rq .alt.has{background:#e0f0d4;box-shadow:0 0 0 1px #8cba78;padding:0 3px}
+  /* 調理画面からレシピ帳へ */
+  .rrow{display:flex;flex-direction:column;align-items:stretch}
+  .rlink{align-self:flex-end;font-family:inherit;font-size:10.5px;font-weight:500;border:0;background:none;color:var(--sub);padding:2px 2px 4px;cursor:pointer;
+    text-decoration:underline dotted;text-underline-offset:3px}
+  .rfind{display:flex;align-items:center;justify-content:center;gap:4px;width:100%;margin-top:10px;font-family:inherit;font-size:12px;font-weight:700;border:0;background:#fffdf7;color:#5a1e2a;padding:8px;cursor:pointer;
+    box-shadow:0 -2px 0 0 var(--line),0 2px 0 0 var(--line),-2px 0 0 0 var(--line),2px 0 0 0 var(--line)}
+  .rfind .pxi{width:18px;height:18px}
   /* ===== タイトル画面 ===== */
   #title{position:fixed;inset:0;z-index:40;overflow-y:auto;-webkit-overflow-scrolling:touch;
     background-color:#f3ead8;
@@ -1200,6 +1244,23 @@ const GUEST_LABEL = {'老舗の料理評論家':['老舗の','料理評論家'],
 const GUEST_TAG_WRAP = {'老舗の料理評論家':'味のまとまりに<wbr>うるさい', '原理主義の美食家':'ジャンルに<wbr>厳格', '成金社長':'高級食材が<wbr>好き',
   '腹ペコの学生':'量があれば<wbr>満足', '前衛アーティスト':'奇妙な皿ほど<wbr>喜ぶ', '甘党のマダム':'甘いものに<wbr>目がない',
   'コース構成マニア':'流れを<wbr>重視', '旬にうるさい板前':'季節の食材を<wbr>重んじる', '近所のおばあちゃん':'たいてい<wbr>褒めてくれる'};
+// 近所のおばあちゃん専用のことば（評価が低くても、責めずにフォローする）
+const isGranny = g => g.name === '近所のおばあちゃん';
+const pickOne = arr => arr[Math.floor(Math.random() * arr.length)];
+const GRANNY = {
+  dish: [
+    ['あらまあ、おいしいねぇ。ばあちゃん、これ好きだよ。', 'よくできてるねぇ。おかわりしたいくらいだよ。', 'ほっぺたが落ちそうだねぇ。上手だこと。'],
+    ['うんうん、ちゃんとおいしいよ。', 'やさしい味だねぇ。ばあちゃんは好きだよ。', 'いいじゃないの。次のお皿も楽しみだねぇ。'],
+    ['あらあら、面白い味だねぇ。若い人の料理は新しいねぇ。', 'ちょっと変わってるけど、ばあちゃんは嫌いじゃないよ。', 'がんばってるのが伝わってくるよ。気にしなさんな。'],
+  ],
+  crowded: ['まあ、こんなにたくさん。食べきれるかねぇ、ふふ。', 'にぎやかなお皿だねぇ。ばあちゃん、目移りしちゃうよ。'],
+  empty: ['あら、お皿だけかい。お腹を空かせておくのも楽しみのうちだねぇ。'],
+  final: [
+    [d => `「${d}」がとくにおいしかったねぇ。また来るよ、ありがとうね。`, d => `どれもおいしかったけど、「${d}」は格別だったよ。ごちそうさま。`],
+    [d => `「${d}」、なつかしい味がしたよ。いいお店になるねぇ。`, d => `ごちそうさま。「${d}」、ばあちゃんは好きだったよ。`],
+    [d => `初日でこれだけできたら上出来だよ。ばあちゃんはまた来るからね。`, d => `いろんな味が楽しめたねぇ。慣れたらもっと上手になるよ。`],
+  ],
+};
 const COMMENT = {
   harm:  [d=>`「${d}」は味がきちんとまとまっている。見事だ。`, d=>`「${d}」は悪くないが、もう一歩まとまりが欲しい。`, d=>`「${d}」は……味が喧嘩している。`],
   fit:   [d=>`この位置に「${d}」を出す判断、正しい。`, d=>`「${d}」は、コースのこの位置としては少し収まりが悪い。`, d=>`なぜここで「${d}」が出てくるのか。`],
@@ -1255,7 +1316,11 @@ function reviewCourse(){
     }
     const band = val >= 68 ? 0 : val >= 45 ? 1 : 2;
     let text = COMMENT[ax][band](dn || 'この料理');
-    if (g.bonus && band === 2) text = 'まあまあ、頑張ったねぇ。おいしかったよ。';
+    if (isGranny(g)){
+      const bi = per.map((v, i) => [v, i]).filter(([, i]) => dishes[i]).sort((a, b) => b[0] - a[0])[0];
+      const gb = score >= 68 ? 0 : score >= 45 ? 1 : 2;
+      text = pickOne(GRANNY.final[gb])(bi ? names[bi[1]] : 'お料理');
+    }
     return {g, score: Math.round(score), text, per};
   });
   const final = Math.round(reviews.reduce((a,r) => a + r.score, 0) / reviews.length);
@@ -2068,10 +2133,11 @@ function recipeHelpHTML(items){
   if (!list.length) return '';
   // 調理法の条件があるものはワンタップで合わせられる。条件のないものは、優先される定番があるときだけ「材料もそろっている」と表示
   return `<div class="rhelp">` + list.slice(0, 4).map(({c, i}) => {
-    if (cur && cur.c === c) return `<div class="rok">✓ 定番「${comboTitle(c)}」になります</div>`;
+    const link = `<button class="rlink" data-rlink="${i}">レシピを見る ›</button>`;
+    if (cur && cur.c === c) return `<div class="rrow"><div class="rok">✓ 定番「${comboTitle(c)}」になります</div>${link}</div>`;
     const need = c.m ? Object.entries(c.m).filter(([n]) => items.some(p => ing(p)[1] === n)) : [];
-    if (need.length) return `<button class="rbtn" data-combo="${i}">「${comboTitle(c)}」に<wbr>する<wbr>（${need.map(([n, ms]) => `${n}を${actionOf(ms[0])}`).join('、')}）</button>`;
-    return `<div class="rsub">「${comboTitle(c)}」の<wbr>材料もそろっています<wbr>（より材料の多い<wbr>定番が優先）</div>`;
+    if (need.length) return `<div class="rrow"><button class="rbtn" data-combo="${i}">「${comboTitle(c)}」に<wbr>する<wbr>（${need.map(([n, ms]) => `${n}を${actionOf(ms[0])}`).join('、')}）</button>${link}</div>`;
+    return `<div class="rrow"><div class="rsub">「${comboTitle(c)}」の<wbr>材料もそろっています<wbr>（より材料の多い<wbr>定番が優先）</div>${link}</div>`;
   }).join('') + `</div>`;
 }
 // 調理法を選ぶ欄（食材をタップすると開く）
@@ -2089,7 +2155,7 @@ function renderPanel(){
     const amt = d.portion >= 70 ? '適量' : d.amountDir > 0 ? '多め' : '少なめ';
     html += `<div class="slot cur"><h2><span>${slotName(curSlot)}<wbr>（${slotGen(curSlot)}）</span>` +
       `<span style="white-space:nowrap">${items.length}品　量 <span class="mark">${amt}</span>　まとまり <span class="mark">${mk}</span></span></h2>` +
-      `<div class="chips">${items.map(chipHTML).join('')}</div>` + pickerHTML(items) + `<div class="dish">${dishName(items)}</div>` + recipeHelpHTML(items) + `</div>` +
+      `<div class="chips">${items.map(chipHTML).join('')}</div>` + pickerHTML(items) + `<div class="dish">${dishName(items)}</div>` + recipeHelpHTML(items) + `<button class="rfind" id="rbFind">${ICON.bookImg()}この皿の食材で作れる定番をレシピ帳でさがす</button></div>` +
       `<button class="btn" id="serveBtn">お出しする</button>`;
   }
   // コースの進み具合
@@ -2102,6 +2168,9 @@ function renderPanel(){
 
 panel.addEventListener('click', e => {
   const t = e.target;
+  const rlk = t.closest('[data-rlink]');
+  if (rlk){ const c = COMBOS[+rlk.dataset.rlink]; openRecipes({tab: c.g, focus: c.n}); return; }
+  if (t.closest('#rbFind')){ openRecipes({mine: true}); return; }
   const rb = t.closest('[data-combo]');
   if (rb && phase === 'cook'){
     const c = COMBOS[+rb.dataset.combo], items = slotItems(curSlot), u = matchByNames(c, items);
@@ -2140,27 +2209,128 @@ const METHOD_JP = {grill:'焼く',fry:'揚げる',stew:'煮込む',steam:'蒸す
 const METHOD_JP_G = {grill:{cn:'炒める'}};
 const actionOf = (m, g = genre.key) => (METHOD_JP_G[m] && METHOD_JP_G[m][g]) || METHOD_JP[m];
 const GENRE_JP = {fr:'フレンチ・洋食', it:'イタリアン', cn:'中華', jp:'和食'};
+const GENRE_SHORT = {fr:'仏', it:'伊', cn:'中', jp:'和'};
 let found = new Set();
 try { found = new Set(JSON.parse(localStorage.getItem('fc_found') || '[]')); } catch(_) {}
 function markFound(name){ found.add(name); try { localStorage.setItem('fc_found', JSON.stringify([...found])); } catch(_) {} }
-let rbTab = 'fr';
+
+// 料理の分類（最初の材料＝主役の分類で決める）
+const RB_GROUPS = [
+  ['meat',  '肉の料理',           c => c === 'meat'],
+  ['fish',  '魚介の料理',         c => c === 'fish'],
+  ['veg',   '野菜・きのこの料理', c => c === 'veg'],
+  ['grain', 'ごはん・麺・粉もの', c => c === 'grain'],
+  ['dairy', '卵・乳・豆腐の料理', c => c === 'dairy'],
+  ['sweet', 'デザート・甘味',     c => c === 'fruit' || c === 'sweet' || c === 'nut'],
+  ['other', 'そのほか',           c => true],
+];
+const groupOf = c => { const cat = (PARAM[c.req[0][0]] || [])[11]; return RB_GROUPS.find(g => g[2](cat))[0]; };
+// ひらがな・カタカナを区別せずに探す
+const kana = s => s.replace(/[ぁ-ゖ]/g, ch => String.fromCharCode(ch.charCodeAt(0) + 0x60)).toLowerCase();
+const COMBO_KEY = COMBOS.map(c => kana(c.n + ' ' + c.req.flat().join(' ')));
+
+const rb = {tab: 'fr', q: '', sort: 'group', mine: false, focus: null};
 const recEl = document.getElementById('recipes');
-function renderRecipes(){
-  const list = COMBOS.filter(c => c.g === rbTab);
-  const total = COMBOS.length, got = COMBOS.filter(c => found.has(c.n)).length;
-  recEl.innerHTML = `<div class="rb">
-    <div class="rb-top"><h2>${ICON.bookImg()} レシピ帳</h2><button class="rb-tab" id="rbClose" style="flex:none;padding:6px 14px">閉じる</button></div>
-    <div class="stat">作ったことのある料理：${got} / ${total}　｜　皿の中でそろうと、その料理になります。「／」はどれか1つ</div>
-    <div class="rb-tabs">${Object.entries(GENRE_JP).map(([k,v]) => `<button class="rb-tab${k === rbTab ? ' on' : ''}" data-tab="${k}">${v}</button>`).join('')}</div>
-    ${list.map(c => `<div class="rc${found.has(c.n) ? ' found' : ''}"><div class="rc-n"><span>${c.n.replace(/・/g, '・' + ZW)}</span>${found.has(c.n) ? '<span class="ok">✓ 作った</span>' : ''}</div>
-      <div class="rc-r">${c.req.map(alts => `<span class="rq">${alts.map(a => `<span class="alt"><img src="${PX.spriteURL(a)}" alt="">${a}${c.m && c.m[a] ? `<span class="mm">${c.m[a].map(m => actionOf(m, rbTab)).join('・')}</span>` : ''}</span>`).join('<span class="plus">／</span>')}</span>`).join('<span class="plus">＋</span>')}</div></div>`).join('')}
-  </div>`;
+const esc = t => String(t).replace(/[&<>"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
+
+// この皿の食材と照らし合わせ：そろっている材料の数と、足りない数
+function mineMatch(c, names){
+  const taken = new Set(); let have = 0; const hasAlt = new Set();
+  for (const alts of c.req){
+    const i = names.findIndex((n, j) => !taken.has(j) && alts.includes(n));
+    if (i >= 0){ taken.add(i); have++; hasAlt.add(names[i]); }
+  }
+  return {have, miss: c.req.length - have, hasAlt};
 }
-document.getElementById('recipeBtn').onclick = () => { rbTab = genre.key; renderRecipes(); recEl.style.display = 'block'; recEl.scrollTop = 0; };
+function currentNames(){ return phase === 'cook' ? slotItems(curSlot).map(p => ing(p)[1]) : []; }
+
+function recipeCard(c, i, mm){
+  const isF = found.has(c.n), focus = rb.focus === c.n;
+  const alt = a => `<span class="alt${mm && mm.hasAlt.has(a) ? ' has' : ''}"><img src="${PX.spriteURL(a)}" alt="">${a}` +
+    (c.m && c.m[a] ? `<span class="mm">${c.m[a].map(m => actionOf(m, c.g)).join('・')}</span>` : '') + `</span>`;
+  return `<div class="rc${isF ? ' found' : ''}${focus ? ' focus' : ''}" data-rcn="${esc(c.n)}">
+    <div class="rc-n"><span>${c.n.replace(/・/g, '・' + ZW)}</span><span class="rc-tags">${rb.tab === 'all' ? `<span class="rc-g">${GENRE_SHORT[c.g]}</span>` : ''}${isF ? '<span class="ok">✓ 作った</span>' : ''}</span></div>
+    <div class="rc-r">${c.req.map(alts => `<span class="rq">${alts.map(alt).join('<span class="plus">／</span>')}</span>`).join('<span class="plus">＋</span>')}</div></div>`;
+}
+
+// 一覧だけを描き直す（入力欄のフォーカスを保つため）
+function renderRecipeList(){
+  const names = rb.mine ? currentNames() : [];
+  const q = kana(rb.q.trim());
+  let list = COMBOS.map((c, i) => ({c, i})).filter(({c, i}) =>
+    (rb.tab === 'all' || c.g === rb.tab) && (!q || q.split(/\s+/).every(w => COMBO_KEY[i].includes(w))));
+  let mmOf = new Map();
+  if (rb.mine){
+    list.forEach(x => mmOf.set(x.i, mineMatch(x.c, names)));
+    list = list.filter(x => mmOf.get(x.i).miss === 0);
+  }
+  const byName = (a, b) => a.c.n.localeCompare(b.c.n, 'ja');
+  let html = '';
+  if (rb.mine){
+    list.sort((a, b) => b.c.req.length - a.c.req.length || byName(a, b));   // 材料の多い（優先される）定番から
+    html = list.map(x => recipeCard(x.c, x.i, mmOf.get(x.i))).join('');
+  } else if (rb.sort === 'group'){
+    for (const [key, label] of RB_GROUPS){
+      const g = list.filter(x => groupOf(x.c) === key).sort(byName);
+      if (g.length) html += `<div class="rb-sec">${label}<span>${g.length}</span></div>` + g.map(x => recipeCard(x.c, x.i)).join('');
+    }
+  } else {
+    if (rb.sort === 'found') list.sort((a, b) => (found.has(b.c.n) - found.has(a.c.n)) || byName(a, b));
+    else if (rb.sort === 'few') list.sort((a, b) => a.c.req.length - b.c.req.length || byName(a, b));
+    else list.sort(byName);
+    html = list.map(x => recipeCard(x.c, x.i)).join('');
+  }
+  const scope = COMBOS.filter(c => rb.tab === 'all' || c.g === rb.tab), got = scope.filter(c => found.has(c.n)).length;
+  document.getElementById('rbCount').textContent = `${list.length}件　｜　作った料理 ${got} / ${scope.length}`;
+  document.getElementById('rbList').innerHTML = html || `<div class="rb-empty">${rb.mine ? 'この皿の食材で作れる定番はありません' : '見つかりませんでした'}</div>`;
+}
+function renderRecipes(){
+  const canMine = phase === 'cook' && slotItems(curSlot).length > 0;
+  if (!canMine) rb.mine = false;
+  const tabs = [['all', 'すべて'], ...Object.entries(GENRE_JP).map(([k, v]) => [k, v.replace('・洋食', '')])];
+  recEl.innerHTML = `<div class="rb">
+    <div class="rb-head">
+      <div class="rb-top"><h2>${ICON.bookImg()} レシピ帳</h2><button class="rb-close" id="rbClose">閉じる</button></div>
+      <div class="rb-search"><input id="rbQ" type="search" enterkeyhint="search" autocomplete="off" placeholder="料理名・食材名でさがす" value="${esc(rb.q)}">${rb.q ? '<button id="rbClear" aria-label="消す">×</button>' : ''}</div>
+      <div class="rb-tabs">${tabs.map(([k, v]) => `<button class="rb-tab${k === rb.tab ? ' on' : ''}" data-tab="${k}">${v}</button>`).join('')}</div>
+      <div class="rb-opts">
+        ${canMine ? `<button class="rb-mine${rb.mine ? ' on' : ''}" id="rbMine">${rb.mine ? '✓ ' : ''}この皿の食材で作れる</button>` : ''}
+        <select id="rbSort"${rb.mine ? ' disabled' : ''}>
+          <option value="group"${rb.sort === 'group' ? ' selected' : ''}>分類ごと</option>
+          <option value="name"${rb.sort === 'name' ? ' selected' : ''}>名前順</option>
+          <option value="found"${rb.sort === 'found' ? ' selected' : ''}>作った料理を先に</option>
+          <option value="few"${rb.sort === 'few' ? ' selected' : ''}>材料が少ない順</option>
+        </select>
+      </div>
+      <div class="rb-count" id="rbCount"></div>
+    </div>
+    <div class="rb-note">皿の中で材料がそろうと、その料理になります。「／」はどれか1つ、赤い字は調理法の条件です。</div>
+    <div id="rbList"></div>
+  </div>`;
+  renderRecipeList();
+}
+// レシピ帳を開く（opts：tab, q, mine, focus）
+function openRecipes(opts = {}){
+  // 皿の食材で探すときは、ほかのジャンルの定番（〜風）も出す
+  rb.tab = opts.tab || (opts.mine ? 'all' : genre.key); rb.q = opts.q ?? ''; rb.mine = !!opts.mine; rb.focus = opts.focus || null;
+  renderRecipes(); recEl.style.display = 'block'; recEl.scrollTop = 0;
+  if (rb.focus){ const el = recEl.querySelector('.rc.focus'); if (el) el.scrollIntoView({block: 'center'}); rb.focus = null; }
+}
+document.getElementById('recipeBtn').onclick = () => openRecipes({mine: phase === 'cook' && slotItems(curSlot).length > 0});
 recEl.addEventListener('click', e => {
-  if (e.target.id === 'rbClose'){ recEl.style.display = 'none'; return; }
-  const tb = e.target.closest('[data-tab]'); if (tb){ rbTab = tb.dataset.tab; renderRecipes(); }
+  const t = e.target;
+  if (t.id === 'rbClose'){ recEl.style.display = 'none'; return; }
+  if (t.id === 'rbClear'){ rb.q = ''; renderRecipes(); document.getElementById('rbQ').focus(); return; }
+  if (t.id === 'rbMine'){ rb.mine = !rb.mine; renderRecipes(); return; }
+  const tb = t.closest('[data-tab]'); if (tb){ rb.tab = tb.dataset.tab; renderRecipes(); }
 });
+recEl.addEventListener('input', e => {
+  if (e.target.id === 'rbQ'){ rb.q = e.target.value; renderRecipeList();
+    const has = !!rb.q, btn = document.getElementById('rbClear');
+    if (has && !btn){ e.target.insertAdjacentHTML('afterend', '<button id="rbClear" aria-label="消す">×</button>'); }
+    if (!has && btn) btn.remove(); }
+});
+recEl.addEventListener('change', e => { if (e.target.id === 'rbSort'){ rb.sort = e.target.value; renderRecipeList(); } });
 
 // ---------- 提供パート：1皿ずつ運ぶ ----------
 const SHORT = {
@@ -2179,7 +2349,7 @@ const moodOf = s => s >= 70 ? 0 : s >= 50 ? 1 : s >= 35 ? 2 : 3;
 
 function dishComment(R2, di){
   const d = R2.dishes[di];
-  if (!d) return {g: guests[0], text: '……皿が、空なのだが？'};
+  if (!d) return {g: guests[0], text: isGranny(guests[0]) ? pickOne(GRANNY.empty) : '……皿が、空なのだが？'};
   // いちばん反応が大きい客が一言
   let gi = 0, best = -1;
   R2.reviews.forEach((r, i) => { const dev = Math.abs(r.per[di] - 55) + Math.random()*6 - (i === lastGi ? 12 : 0); if (dev > best){ best = dev; gi = i; } });
@@ -2189,8 +2359,11 @@ function dishComment(R2, di){
   const val = ax === 'flow' ? d.fit : d[ax];
   const band = val >= 68 ? 0 : val >= 45 ? 1 : 2;
   let t = SHORT[ax][band]; if (typeof t === 'function') t = t(d);
-  if (g.bonus && band === 2) t = 'あらあら、面白い味だねぇ。';
   if (d.notes.includes('品数過多') && Math.random() < 0.5) t = '皿の上が、渋滞している。';
+  if (isGranny(g)){   // おばあちゃんは自分の評価で話し、悪いときもフォローする
+    const v = R2.reviews[gi].per[di], gb = v >= 68 ? 0 : v >= 45 ? 1 : 2;
+    t = d.notes.includes('品数過多') && Math.random() < 0.5 ? pickOne(GRANNY.crowded) : pickOne(GRANNY.dish[gb]);
+  }
   return {g, text: t};
 }
 

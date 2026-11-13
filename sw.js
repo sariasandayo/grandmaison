@@ -1,6 +1,6 @@
 // ありあわせのグランメゾン：オフライン用 service worker
 // 更新したら VERSION を変える（古いキャッシュは自動で消える）
-const VERSION = 'v1';
+const VERSION = 'v2';
 const APP = 'grandmaison-app-' + VERSION;
 const FONT = 'grandmaison-font-' + VERSION;
 
@@ -9,12 +9,12 @@ const SHELL = [
   './',
   './index.html',
   './manifest.webmanifest',
-  './icons/icon-192.png',
-  './icons/icon-512.png',
-  './icons/icon-maskable-192.png',
-  './icons/icon-maskable-512.png',
-  './icons/apple-touch-icon.png',
-  './icons/favicon-32.png',
+  './icon-192.png',
+  './icon-512.png',
+  './icon-maskable-192.png',
+  './icon-maskable-512.png',
+  './apple-touch-icon.png',
+  './favicon-32.png',
 ];
 
 self.addEventListener('install', e => {

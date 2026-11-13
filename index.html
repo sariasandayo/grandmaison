@@ -170,6 +170,20 @@
   .reacts{gap:14px}
   .bubble .bf .pxface{width:40px;height:40px}
   #recipeBtn .pxi,.rb-top .pxi,#round .pxi{width:20px;height:20px;margin:-3px 3px 0 0}
+
+  /* ===== 開店・閉店のドア ===== */
+  #doors{position:fixed;inset:0;z-index:70;display:none;perspective:1400px;overflow:hidden;background:transparent}
+  #doors.show{display:block}
+  #doors.fade{opacity:0;transition:opacity .45s}
+  #doors .dr{position:absolute;inset:0;background-size:100% 100%;image-rendering:pixelated;image-rendering:crisp-edges;
+    transform-origin:left center;transition:transform 1s cubic-bezier(.55,0,.3,1),filter 1s;box-shadow:0 0 0 1px #2b1d1a}
+  #doors.shut .dr{transform:rotateY(0deg)}
+  #doors.opened .dr{transform:rotateY(-96deg);filter:brightness(.7)}
+  #doors .dsign{position:absolute;left:50%;top:21%;width:min(52vw,230px);transform:translateX(-50%);image-rendering:pixelated;image-rendering:crisp-edges;
+    transition:transform .22s ease-in;filter:drop-shadow(3px 4px 0 rgba(0,0,0,.35))}
+  #doors .dsign.flip{transform:translateX(-50%) rotateY(90deg)}
+  @media (prefers-reduced-motion: reduce){ #doors .dr{transition-duration:.15s} }
+  .hold-note{font-size:12px;color:var(--sub);margin:-2px 0 10px;text-align:right}
   /* ===== タイトル画面 ===== */
   #title{position:fixed;inset:0;z-index:40;overflow-y:auto;-webkit-overflow-scrolling:touch;
     background-color:#f3ead8;
@@ -199,14 +213,13 @@
 <div id="title">
   <div class="tt">
     <canvas id="logo" width="272" height="152"></canvas>
-    <p class="tt-lead">〜 食材はえらべない。でも、コースは出す。〜</p>
     <div class="tt-card">
       <h3>■ 本日の営業について</h3>
-      <p>ここは星付きを夢見るレストラン。ただし厨房にあるのは、ゆっくり回り続ける<em>食材のガラポン</em>だけ。出てきた食材で、前菜からデザートまで<em>5皿のフルコース</em>を仕立てます。</p>
+      <p>バイト初日、高級レストランワンオペ！？もうありあわせで作るしかない！</p>
       <h3>■ あそびかた</h3>
       <ol>
         <li>欲しい食材が口に近づいたら、ボタンを長押し。押している間だけ口が開きます。<em>余計なものも一緒に出てきます。</em></li>
-        <li>出てきた食材は、全部その皿に使います。</li>
+        <li>出てきた食材は、全部その皿に使います。フードロス反対！</li>
         <li>食材ごとに調理法を選ぶと、どんな組み合わせでも料理になります。定番の組み合わせなら、名のある一皿に。</li>
         <li>3人のお客さまが皿ごとに味わい、最後にコース全体を採点します。</li>
       </ol>
@@ -215,7 +228,6 @@
       <button class="btn" id="startBtn">開店する</button>
       <button class="btn ghost" id="titleRecipe">レシピ帳を見る</button>
     </div>
-    <div class="tt-foot">お題（料理のジャンルと季節）とお客さまは、営業ごとに変わります</div>
   </div>
 </div>
 <div class="wrap">
@@ -225,8 +237,9 @@
   <canvas id="cv"></canvas>
   <div class="bar">
     <div class="remain" id="remain"></div>
-    <button id="hold">押している間 開放</button>
+    <button id="hold">食材を開放！</button>
   </div>
+  <p class="hold-note">押している間だけ、食材が出ます。1度離すと終了です。</p>
   <div id="panel"></div>
   <div id="summary"></div>
 </div>
@@ -916,7 +929,7 @@ hold.addEventListener('pointercancel', release);
 hold.addEventListener('lostpointercapture', release);
 function updateHold(){
   hold.disabled = phase !== 'spin';
-  hold.textContent = phase === 'spin' ? '押している間 開放' : phase === 'done' ? 'コース終了' : phase === 'cook' ? '調理中' : '提供中';
+  hold.textContent = phase === 'spin' ? '食材を開放！' : phase === 'done' ? 'コース終了' : phase === 'cook' ? '調理中' : '提供中';
   remainEl.innerHTML = phase === 'done' ? '—' : `${curSlot+1}/${SLOTS.length}皿目<br><b>${slotName(curSlot)}</b>`;
 }
 
@@ -2215,6 +2228,7 @@ function serveDish(){
   };
 }
 
+window.__gameReset = () => { closeServe(); reset(); };
 function showFinal(){
   const R2 = reviewCourse();
   const targets = parts.filter(p => p.target), hit = targets.filter(p => p.out).length;
@@ -2227,8 +2241,10 @@ function showFinal(){
         (d ? `<div class="stat">完成度 ${Math.round(d.harm)} ／ 適合 ${Math.round(d.fit)} ／ 量 ${Math.round(d.portion)} ／ ${genre.name}らしさ ${Math.round(d.genre)} ／ 旬 ${Math.round(d.season)}${d.notes.length ? '　' + d.notes.slice(0,2).join('・') : ''}</div>` : '') + '</li>'; }).join('')}</ol>
     <div class="stat">コースの流れ ${R2.flow}${targets.length ? `　／　狙った食材 ${targets.length}個中 ${hit}個 取得` : ''}</div>
     <button class="btn" id="svnext">次の営業へ</button>
+    <button class="btn ghost" id="svclose" style="margin-top:14px">閉店する（タイトルへ）</button>
   </div>`);
   document.getElementById('svnext').onclick = () => { closeServe(); reset(); };
+  document.getElementById('svclose').onclick = () => { if (window.__closeShop) window.__closeShop(); else { closeServe(); reset(); } };
 }
 
 // ---------- ループ ----------
@@ -2249,6 +2265,115 @@ resize(); newRound(); buildPool(); updateRecipeMarks(); updateHold(); renderPane
 })();
 </script>
 <script>
+// ========== 開店・閉店のドア（ドット絵） ==========
+const DOORS = (() => {
+  const K = '#2b1d1a';
+  // 3×5の英字（看板用）
+  const F = {O:'111101101101111', P:'111101111100100', E:'111100111100111', N:'10011101101110011001',
+             C:'111100100100111', L:'100100100100111', S:'111100111001111', D:'110101101101110'};
+  function sign(text, color){
+    const c = document.createElement('canvas'); c.width = 64; c.height = 40; const g = c.getContext('2d');
+    const R = (x, y, w, h, col) => { g.fillStyle = col; g.fillRect(x, y, w, h); };
+    // 吊りひもと釘
+    for (let i = 0; i < 14; i++){ R(31 - i, 2 + Math.round(i*0.62), 1, 1, '#6e4a2a'); R(32 + i, 2 + Math.round(i*0.62), 1, 1, '#6e4a2a'); }
+    R(30, 0, 4, 3, K); R(31, 1, 2, 1, '#e8b84a');
+    // 板
+    R(4, 11, 56, 26, K); R(3, 12, 58, 24, K);
+    R(5, 12, 54, 24, '#f4e4c0'); R(4, 13, 56, 22, '#f4e4c0');
+    R(5, 33, 54, 2, '#d8c49c'); R(6, 13, 52, 1, '#fff6e0');
+    R(4, 11, 3, 3, '#a87a20'); R(57, 11, 3, 3, '#a87a20');    // 金具
+    for (const [x, y] of [[7, 15], [56, 15], [7, 32], [56, 32]]) R(x, y, 1, 1, '#c8a878');
+    // 文字（2倍）
+    const w = [...text].reduce((a, ch) => a + F[ch].length/5*2 + 2, -2);
+    let x = Math.round(32 - w/2);
+    for (const ch of text){
+      const f = F[ch], cw = f.length/5;
+      for (let i = 0; i < f.length; i++) if (f[i] === '1'){ R(x + (i%cw)*2 + 1, 19 + (i/cw|0)*2 + 1, 2, 2, 'rgba(0,0,0,.18)'); R(x + (i%cw)*2, 19 + (i/cw|0)*2, 2, 2, color); }
+      x += cw*2 + 2;
+    }
+    return c.toDataURL();
+  }
+  // 扉（左に蝶番、右に取っ手。画面いっぱいの1枚）
+  function door(gw, gh, mirror){
+    const c = document.createElement('canvas'); c.width = gw; c.height = gh; const g = c.getContext('2d');
+    if (mirror){ g.translate(gw, 0); g.scale(-1, 1); }
+    const R = (x, y, w, h, col) => { g.fillStyle = col; g.fillRect(x, y, w, h); };
+    R(0, 0, gw, gh, K);
+    R(1, 1, gw - 2, gh - 2, '#7a4422');
+    for (let x = 3; x < gw - 2; x += 6) R(x, 1, 1, gh - 2, '#6a3a1c');            // 木目
+    R(1, 1, gw - 2, 1, '#9a5a30'); R(1, 1, 1, gh - 2, '#9a5a30');
+    const m = 5, wx = m, ww = gw - m*2;
+    // 上のガラス窓
+    const wy = Math.round(gh*0.10), wh = Math.round(gh*0.36);
+    R(wx - 1, wy - 1, ww + 2, wh + 2, K); R(wx, wy, ww, wh, '#4a6a78');
+    R(wx, wy, ww, Math.round(wh*0.5), '#5a7c8a');
+    for (let i = 0; i < wh; i++){ const x = wx + 3 + Math.round(i*0.35); if (x + 2 < wx + ww) R(x, wy + i, 2, 1, 'rgba(255,255,255,.35)'); }
+    R(wx + Math.round(ww/2), wy, 1, wh, K); R(wx, wy + Math.round(wh/2), ww, 1, K);   // 格子
+    // 窓に金の星（グランメゾンの印）
+    const sx = wx + Math.round(ww*0.75), sy = wy + Math.round(wh*0.25);
+    for (const [dx, dy] of [[0,-2],[0,-1],[0,0],[0,1],[0,2],[-2,0],[-1,0],[1,0],[2,0],[-1,-1],[1,1],[1,-1],[-1,1]]) R(sx + dx, sy + dy, 1, 1, '#e8b84a');
+    // 下の飾り板
+    const py = Math.round(gh*0.56), phh = Math.round(gh*0.30);
+    R(wx - 1, py - 1, ww + 2, phh + 2, K); R(wx, py, ww, phh, '#8a5028');
+    R(wx + 2, py + 2, ww - 4, phh - 4, '#6a3a1c'); R(wx + 3, py + 3, ww - 6, phh - 6, '#7a4422');
+    R(wx, py, ww, 1, '#a8683a');
+    // 取っ手（内側の縁）
+    const hx = gw - 5, hy = Math.round(gh*0.50);
+    R(hx - 1, hy - 7, 3, 15, K); R(hx, hy - 6, 1, 13, '#e8b84a'); R(hx, hy - 6, 1, 3, '#fff0a0');
+    // 足元の金属板
+    R(1, gh - Math.round(gh*0.05), gw - 2, Math.round(gh*0.05) - 1, '#a87a20'); R(1, gh - Math.round(gh*0.05), gw - 2, 1, '#e8b84a');
+    return c.toDataURL();
+  }
+  let el = null, imgs = null;
+  function build(){
+    const vw = window.innerWidth, vh = window.innerHeight;
+    const gw = 64, gh = Math.max(100, Math.round(gw * vh / vw));
+    const dl = door(gw, gh);
+    imgs = {open: sign('OPEN', '#2f8a3a'), closed: sign('CLOSED', '#b5452f')};
+    if (el) el.remove();
+    el = document.createElement('div'); el.id = 'doors';
+    el.innerHTML = `<div class="dr" style="background-image:url(${dl})"><img class="dsign" alt=""></div>`;
+    document.body.appendChild(el);
+  }
+  const wait = ms => new Promise(r => setTimeout(r, ms));
+  const fast = () => { try { return matchMedia('(prefers-reduced-motion: reduce)').matches; } catch(_){ return false; } };
+  async function flip(to){
+    const s = el.querySelector('.dsign');
+    s.classList.add('flip'); await wait(fast() ? 60 : 220);
+    s.src = imgs[to]; s.classList.remove('flip'); await wait(fast() ? 60 : 260);
+  }
+  let busy = false;
+  // 開店：CLOSED → OPEN に裏返し、扉が開く
+  async function open(onOpen){
+    if (busy) return; busy = true; build();
+    el.querySelector('.dsign').src = imgs.closed;
+    el.className = 'shut show';
+    await wait(fast() ? 50 : 350);
+    await flip('open');
+    await wait(fast() ? 50 : 250);
+    onOpen && onOpen();
+    el.classList.remove('shut'); el.classList.add('opened');
+    await wait(fast() ? 100 : 950);
+    el.className = ''; busy = false;
+  }
+  // 閉店：扉が閉まり、OPEN → CLOSED に裏返して、タイトルへ
+  async function close(onClosed){
+    if (busy) return; busy = true; build();
+    el.querySelector('.dsign').src = imgs.open;
+    el.className = 'opened show';
+    await wait(30);
+    el.classList.remove('opened'); el.classList.add('shut');
+    await wait(fast() ? 100 : 900);
+    await flip('closed');
+    await wait(fast() ? 50 : 400);
+    onClosed && onClosed();
+    el.classList.add('fade');
+    await wait(fast() ? 50 : 450);
+    el.className = ''; busy = false;
+  }
+  return {open, close};
+})();
+
 // ========== タイトル画面とロゴ（ドット絵） ==========
 (() => {
   const cv = document.getElementById('logo'), g = cv.getContext('2d');
@@ -2332,7 +2457,8 @@ resize(); newRound(); buildPool(); updateRecipeMarks(); updateHold(); renderPane
   }
   draw();
   const title = document.getElementById('title');
-  document.getElementById('startBtn').onclick = () => { title.classList.add('hide'); window.scrollTo(0, 0); };
+  document.getElementById('startBtn').onclick = () => DOORS.open(() => { title.classList.add('hide'); window.scrollTo(0, 0); });
+  window.__closeShop = () => DOORS.close(() => { if (window.__gameReset) window.__gameReset(); title.classList.remove('hide'); title.scrollTop = 0; });
   document.getElementById('titleRecipe').onclick = () => document.getElementById('recipeBtn').click();
 })();
 </script>

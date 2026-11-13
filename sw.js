@@ -1,6 +1,6 @@
 // ありあわせのグランメゾン：オフライン用 service worker
 // 更新したら VERSION を変える（古いキャッシュは自動で消える）
-const VERSION = 'v2';
+const VERSION = 'v3';
 const APP = 'grandmaison-app-' + VERSION;
 const FONT = 'grandmaison-font-' + VERSION;
 

@@ -201,7 +201,7 @@
   .res-head .rh-s{font-size:12px;opacity:.85;margin-top:2px}
   .res-score{margin-top:6px;line-height:1}
   .res-score b{font-size:54px;font-weight:800;color:#f8d860;text-shadow:3px 3px 0 #2a0c12}
-  .res-score span{font-size:16px;margin-left:4px}
+  .res-score .stars,.res-score .stars span{margin:0}
   .res-h{font-size:13px;font-weight:800;color:#b5452f;margin:4px 2px 8px}
   .res-guests{display:flex;flex-direction:column;gap:10px;margin:0 2px 18px}
   .rg{display:grid;grid-template-columns:40px 1fr auto;grid-template-rows:auto auto;column-gap:10px;align-items:center;background:#fffdf7;padding:8px 10px;
@@ -278,6 +278,26 @@
   .rfind{display:flex;align-items:center;justify-content:center;gap:4px;width:100%;margin-top:10px;font-family:inherit;font-size:12px;font-weight:700;border:0;background:#fffdf7;color:#5a1e2a;padding:8px;cursor:pointer;
     box-shadow:0 -2px 0 0 var(--line),0 2px 0 0 var(--line),-2px 0 0 0 var(--line),2px 0 0 0 var(--line)}
   .rfind .pxi{width:18px;height:18px}
+  /* ===== 1画面に収めるレイアウト ===== */
+  .wrap{padding-top:10px!important}
+  #round{display:flex!important;align-items:center;justify-content:space-between;gap:8px;padding:6px 8px!important;margin:6px 0 6px!important}
+  #round .g{font-size:12px;line-height:1.4}
+  .gmini{display:flex;gap:2px;border:0;background:none;padding:0;cursor:pointer;flex:none}
+  .pxface.sm{width:26px;height:26px}
+  .hold-note{margin:-4px 0 8px!important;line-height:1.5}
+  .bar{margin:8px 0 8px!important}
+  #guestBox{margin-top:16px}
+  .gb-h{font-size:13px;font-weight:800;color:#b5452f;margin:0 2px 8px}
+  .intro .res-head{margin-bottom:14px}
+  .intro-list{display:flex;flex-direction:column;gap:10px;margin:0 2px 18px}
+  .ig{display:grid;grid-template-columns:48px 1fr;column-gap:12px;align-items:center;background:#fffdf7;padding:10px 12px;
+    box-shadow:0 -2px 0 0 var(--line),0 2px 0 0 var(--line),-2px 0 0 0 var(--line),2px 0 0 0 var(--line)}
+  .ig .pxface.big{width:48px;height:48px}
+  .ig-n{font-size:16px;font-weight:800}
+  .ig-n small{display:block;font-size:11px;color:var(--sub);font-weight:500}
+  .ig-t{font-size:12.5px;color:var(--sub);margin-top:2px;word-break:keep-all;overflow-wrap:anywhere}
+  .ig-f{font-size:12px;margin-top:5px;padding-top:5px;border-top:1px dotted var(--line)}
+  .ig-f b{color:#b5452f}
   /* ===== タイトル画面 ===== */
   #title{position:fixed;inset:0;z-index:40;overflow-y:auto;-webkit-overflow-scrolling:touch;
     background-color:#f3ead8;
@@ -327,15 +347,15 @@
 <div class="wrap">
   <div class="titlebar"><h1 class="logo-s">ありあわせのグランメゾン</h1><button id="recipeBtn">レシピ帳</button></div>
   <div id="round"></div>
-  <p class="hint">容器はゆっくり<wbr>回り続けます。<wbr>狙いの食材が<wbr>排出口に<wbr>近づいたら<wbr>ボタンを長押し。<wbr>押している間は<wbr>回転が止まり、<wbr>下の排出口が<wbr>開きます（1皿ごとに1回）。食材をタップすると<wbr>「狙い」の印。</p>
   <canvas id="cv"></canvas>
   <div class="bar">
     <div class="remain" id="remain"></div>
     <button id="hold">食材を開放！</button>
   </div>
-  <p class="hold-note">押している間だけ、<wbr>食材が出ます。<wbr>1度離すと<wbr>終了です。</p>
+  <p class="hold-note">押している間だけ、<wbr>食材が出ます。<wbr>1度離すと<wbr>終了です。<wbr>食材をタップすると<wbr>狙いの印を<wbr>付けられます。</p>
   <div id="panel"></div>
   <div id="summary"></div>
+  <div id="guestBox"></div>
 </div>
 <div id="serve"></div>
 <div id="recipes"></div>
@@ -608,7 +628,9 @@ function resize(){
   // ガラポンと開放ボタンが一画面に収まる大きさにする
   const pe = cv.parentElement, cs = getComputedStyle(pe);
   const avail = pe.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
-  const w = Math.max(220, Math.min(avail, 460, (window.innerHeight - 230) / H * W));
+  const top = cv.getBoundingClientRect().top + window.scrollY;   // ガラポンより上の高さ
+  const below = 112;                                               // ボタン・説明の高さ
+  const w = Math.max(200, Math.min(avail, 460, (window.innerHeight - top - below) / H * W));
   cv.style.width = w + 'px';
   scale = w / W; dpr = Math.min(window.devicePixelRatio || 1, 2.5);
   cv.style.height = (H*scale) + 'px';
@@ -2079,9 +2101,13 @@ function dishName(items){
     return comboTitle(cb.c) + (others.length ? `、${ZW}${j(others)}を添えて` : '');
   }
   const main = by('main')[0];
-  const S = grp(by('side'), 2), Q = grp(by('sauce'), 2), P = grp(by('powder'), 1);
+  // 主役と同じ調理法の添えは「AとBのグリリア」のように主役とまとめる（「〜を添えて」にしない）
+  const mates = main && !phraseOf(main) ? by('side').filter(p => !phraseOf(p) && methodName(p) === methodName(main)) : [];
+  const S = grp(by('side').filter(p => !mates.includes(p)), 2), Q = grp(by('sauce'), 2), P = grp(by('powder'), 1);
   const QPnames = [...new Set([...by('sauce'), ...by('powder')].map(p => ing(p)[1]))].slice(0, 2);
-  const head = main ? ph(main) : (S.shift() || Q.shift() || P.shift());
+  const mainNames = main ? [...new Set([main, ...mates].map(p => ing(p)[1]))] : [];
+  const head = !main ? (S.shift() || Q.shift() || P.shift())
+    : mainNames.length > 1 ? `${mainNames.slice(0, 2).join('と' + ZW)}${mainNames.length > 2 ? 'など' : ''}の${ZW}${methodName(main)}` : ph(main);
   const hash = items.reduce((a, p) => a + p.k*31 + p.method.length*7, 0);
   let v = hash % 3;
   if (v === 2 && (!QPnames.length || !main || [...by('sauce'), ...by('powder')].some(p => phraseOf(p)))) v = 0;   // 固有名のソースは名前を出す
@@ -2118,13 +2144,31 @@ function chipHTML(p){
   return `<span class="${cls.join(' ')}"><span data-role="${p.id}" style="display:inline-flex;align-items:center;gap:3px">${p.role === 'main' ? '★' : ''}<img class="pxi" src="${PX.spriteURL(ing(p)[1])}" alt="">${ing(p)[1]}${shun}<span class="role ${p.form}">${methodName(p)}</span></span></span>`;
 }
 
+const guestCard = g => { const [pre, noun] = GUEST_LABEL[g.name] || ['', g.name];
+  return `<div class="guest"><div class="f">${ICON.faceImg(g, 1)}</div><div class="n"><small>${pre}</small><b>${noun}</b></div><div class="t">${GUEST_TAG_WRAP[g.name] || g.tag}</div></div>`; };
+// お客さまが重視すること（重みの大きい順に2つ）
+const AXIS_WORD = {harm:'味のまとまり', fit:'コースとの合い方', genre:'ジャンルらしさ', lux:'高級な食材', vol:'量の多さ', odd:'意外な組み合わせ', sweet:'甘さ', flow:'コースの流れ', season:'旬の食材', portion:'ちょうどいい量'};
+const guestFocus = g => Object.entries(g.w).sort((a, b) => b[1] - a[1]).slice(0, 2).map(([k]) => AXIS_WORD[k]).join('・');
 function renderRound(){
   document.getElementById('round').innerHTML =
-    `<div class="g">本日のお題：<b>${genre.name}</b>　季節：<b>${ICON.seasonImg(season)}${season.name}</b></div><div class="guests">` +
-    guests.map(g => { const [pre, noun] = GUEST_LABEL[g.name] || ['', g.name];
-      return `<div class="guest"><div class="f">${ICON.faceImg(g, 1)}</div><div class="n"><small>${pre}</small><b>${noun}</b></div><div class="t">${GUEST_TAG_WRAP[g.name] || g.tag}</div></div>`; }).join('') + '</div>';
+    `<div class="g">本日のお題：<b>${genre.name}</b>　季節：<b>${ICON.seasonImg(season)}${season.name}</b></div>` +
+    `<button class="gmini" id="guestMini" aria-label="本日のお客さま">${guests.map(g => ICON.faceImg(g, 1, 'pxface sm')).join('')}</button>`;
+  document.getElementById('guestBox').innerHTML = `<div class="gb-h">本日のお客さま</div><div class="guests">${guests.map(guestCard).join('')}</div>`;
+  resize();
 }
-function newRound(){ genre = GENRES[Math.floor(Math.random()*GENRES.length)]; season = SEASONS[Math.floor(Math.random()*SEASONS.length)]; pickGuests(); renderRound(); }
+// 営業の始めに「本日のお客さま」を紹介する
+function showGuestIntro(){
+  openServe(`<div class="sv intro">
+    <div class="res-head"><div class="rh-t">本日のお客さま</div><div class="rh-s">お題：${genre.name}・${ICON.seasonImg(season)}${season.name}</div></div>
+    <div class="intro-list">${guests.map(g => { const [pre, noun] = GUEST_LABEL[g.name] || ['', g.name];
+      return `<div class="ig">${ICON.faceImg(g, 1, 'pxface big')}<div><div class="ig-n"><small>${pre}</small>${noun}</div><div class="ig-t">${GUEST_TAG_WRAP[g.name] || g.tag}</div>
+        <div class="ig-f">重視すること：<b>${guestFocus(g)}</b></div></div></div>`; }).join('')}</div>
+    <button class="btn" id="introOk">厨房へ</button>
+  </div>`);
+  document.getElementById('introOk').onclick = closeServe;
+}
+function newRound(){ genre = GENRES[Math.floor(Math.random()*GENRES.length)]; season = SEASONS[Math.floor(Math.random()*SEASONS.length)]; pickGuests(); renderRound(); showGuestIntro(); }
+document.getElementById('round').addEventListener('click', e => { if (e.target.closest('#guestMini')) showGuestIntro(); });
 
 // この皿で作れる定番料理：成立中なら表示、調理法が足りなければワンタップで合わせるボタン
 function recipeHelpHTML(items){
@@ -2155,7 +2199,7 @@ function renderPanel(){
     const amt = d.portion >= 70 ? '適量' : d.amountDir > 0 ? '多め' : '少なめ';
     html += `<div class="slot cur"><h2><span>${slotName(curSlot)}<wbr>（${slotGen(curSlot)}）</span>` +
       `<span style="white-space:nowrap">${items.length}品　量 <span class="mark">${amt}</span>　まとまり <span class="mark">${mk}</span></span></h2>` +
-      `<div class="chips">${items.map(chipHTML).join('')}</div>` + pickerHTML(items) + `<div class="dish">${dishName(items)}</div>` + recipeHelpHTML(items) + `<button class="rfind" id="rbFind">${ICON.bookImg()}この皿の食材で作れる定番をレシピ帳でさがす</button></div>` +
+      `<div class="chips">${items.map(chipHTML).join('')}</div>` + pickerHTML(items) + `<div class="dish">${dishName(items)}</div>` + recipeHelpHTML(items) + `</div>` +
       `<button class="btn" id="serveBtn">お出しする</button>`;
   }
   // コースの進み具合
@@ -2170,7 +2214,6 @@ panel.addEventListener('click', e => {
   const t = e.target;
   const rlk = t.closest('[data-rlink]');
   if (rlk){ const c = COMBOS[+rlk.dataset.rlink]; openRecipes({tab: c.g, focus: c.n}); return; }
-  if (t.closest('#rbFind')){ openRecipes({mine: true}); return; }
   const rb = t.closest('[data-combo]');
   if (rb && phase === 'cook'){
     const c = COMBOS[+rb.dataset.combo], items = slotItems(curSlot), u = matchByNames(c, items);

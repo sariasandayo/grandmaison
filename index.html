@@ -1342,18 +1342,94 @@ const GRANNY = {
     [d => `初日でこれだけできたら上出来だよ。ばあちゃんはまた来るからね。`, d => `いろんな味が楽しめたねぇ。慣れたらもっと上手になるよ。`],
   ],
 };
-const COMMENT = {
-  harm:  [d=>`「${d}」は味がきちんとまとまっている。見事だ。`, d=>`「${d}」は悪くないが、もう一歩まとまりが欲しい。`, d=>`「${d}」は……味が喧嘩している。`],
-  fit:   [d=>`この位置に「${d}」を出す判断、正しい。`, d=>`「${d}」は、コースのこの位置としては少し収まりが悪い。`, d=>`なぜここで「${d}」が出てくるのか。`],
-  genre: [()=>`これぞ${genre.name}、という一皿が並んでいた。`, ()=>`${genre.name}と呼ぶには、ところどころ迷いがある。`, ()=>`これを${genre.name}と言い張るのは無理がある。`],
-  lux:   [d=>`「${d}」、素材が実に贅沢だ。気に入った。`, d=>`もう少し高い食材を使ってもいいんじゃないか。`, d=>`「${d}」……ずいぶん庶民的だな。`],
-  vol:   [d=>`「${d}」がボリューム満点で最高でした！`, d=>`量はまあまあ。もうちょっと食べたかったです。`, d=>`正直、量が全然足りません……。`],
-  odd:   [d=>`「${d}」！ この混沌こそ芸術だ。`, d=>`「${d}」には、もう少し狂気が欲しかった。`, d=>`無難すぎる。「${d}」には何の驚きもない。`],
-  season: [d=>`「${d}」、${season.name}の味覚が見事にそろっている。`, d=>`季節感がもう一つ。今は${season.name}だ。`, d=>`今が${season.name}だということを忘れていないか。`],
-  sweet: [d=>`「${d}」の甘さ、とろけるようでしたわ。`, d=>`甘いものがもう少し欲しかったですわね。`, d=>`甘味がどこにもありませんでしたわ……。`],
-  portion: [()=>`どの皿も量がちょうどよかった。`, ()=>`皿によって量にばらつきがある。`, ()=>`量の感覚がどうにもおかしい。`],
-  flow:  [()=>`最初から最後まで、流れが美しい。`, ()=>`構成に一部、段差を感じる。`, ()=>`コースとしての流れが破綻している。`],
+// お客さまごとのことば（全員共通のコメントは使わず、それぞれの口調で話す）
+// dish：皿ごとの一言［良い, ふつう, 悪い］、crowded：品数過多、empty：空の皿、final：本日の評価［良い, ふつう, 悪い］
+const G_ = () => genre.name, S_ = () => season.name;
+const VOICE = {
+  '老舗の料理評論家': {
+    dish: [['味の輪郭がくっきりしている。見事だ。', '一口で設計が読める皿だ。', 'この調和は、書き留めておこう。'],
+           ['悪くはない。だが、詰めが甘い。', '狙いは見える。味がまだ追いついていない。', '及第点、といったところか。'],
+           ['味が喧嘩している……。', 'これは、皿の上の口論だ。', '筆が重くなる一皿だな。']],
+    crowded: ['皿の上が、渋滞している。', '要素が多すぎる。引き算を覚えたまえ。'],
+    empty: ['……空の皿を評する言葉は、持ち合わせていない。'],
+    final: [d => `「${d}」を筆頭に、味の設計が一貫していた。記事に書かせてもらおう。`,
+            d => `光る皿はあった。だが、コース全体のまとまりはまだ粗い。`,
+            d => `味が喧嘩する皿が多すぎた。今日の記事は、短くなりそうだ。`],
+  },
+  '原理主義の美食家': {
+    dish: [[() => `正統な${G_()}だ。`, '伝統への敬意を感じる。', 'この皿は、教科書に載せてよい。'],
+           [() => `${G_()}……と呼んでよいものか。`, '解釈が自由すぎる。', '正道から半歩、外れている。'],
+           [() => `これは${G_()}ではない。断じて。`, '伝統を何だと思っている。', '冒涜に近い。']],
+    crowded: [() => `足し算で${G_()}は作れない。`],
+    empty: ['皿だけ出すのは、どの流派の作法だね。'],
+    final: [d => `どの皿も${G_()}の作法に忠実だった。認めよう。`,
+            d => `${G_()}の皮をかぶった、別の何かが混じっていた。`,
+            d => `これを${G_()}と称するのは、看板への侮辱だ。`],
+  },
+  '成金社長': {
+    dish: [['おお、高そうな味がするのう！', 'これぞワシにふさわしい皿じゃ。', 'いい素材を使っとる。気に入った！'],
+           ['もうちょっと奮発してもええんじゃないか。', '値段のわりに、庶民の匂いがするのう。', '金に糸目はつけんと言うたろう。'],
+           ['なんじゃ、この安っぽい皿は。', 'ワシを誰だと思っとる。', 'スーパーの特売か？']],
+    crowded: ['ほう、山盛りか！ 景気がええのう。'],
+    empty: ['皿だけ？ 新手の高級料理か？'],
+    final: [d => `「${d}」、あれは高くついたじゃろう。満足じゃ！`,
+            d => `悪くはないが、もっと金のかかった味が欲しかったのう。`,
+            d => `ワシの舌には、ちと安すぎたわい。`],
+  },
+  '腹ペコの学生': {
+    dish: [['うまっ！ 量もすごい！', 'これ、おかわりできます？', '腹にたまる〜、最高っす！'],
+           ['おいしいけど、もうちょい欲しいっす。', 'あと半分くらい量があれば……。', 'ちょっと上品すぎるかも。'],
+           ['え、これだけ……？', '一口で終わっちゃいました。', '帰りにラーメン寄ろうかな……。']],
+    crowded: ['いろいろ乗ってて得した気分っす！'],
+    empty: ['……あの、皿しかないっす。'],
+    final: [d => `「${d}」が特に最高でした！ 腹いっぱいっす！`,
+            d => `うまかったけど、まだ腹八分目にも届いてないっす。`,
+            d => `正直、まだ全然お腹すいてます……。`],
+  },
+  '前衛アーティスト': {
+    dish: [['この混沌、素晴らしい！', '皿の上に宇宙が見える。', '狂気と美食の婚姻だ！'],
+           ['まだ常識が残っている。', '惜しい、あと一滴の狂気を。', '秩序が少し邪魔をしているね。'],
+           ['退屈だ。', '教科書どおり。眠くなる。', '何の驚きもない。']],
+    crowded: ['この渋滞こそ芸術だ！', '皿の上の混雑、実にいい。', 'あふれんばかりの混沌、素晴らしい！'],
+    empty: ['空の皿……これは問いかけだね。素晴らしい！'],
+    final: [d => `「${d}」！ あの混沌こそ芸術だ。`,
+            d => `ところどころに狂気の芽はあった。育てたまえ。`,
+            d => `無難すぎる。今夜は何も生まれなかった。`],
+  },
+  '甘党のマダム': {
+    dish: [['甘くて幸せ……。', 'とろけるような甘さですわ。', 'これですわ、これを待っていましたの。'],
+           ['甘さが少し足りないわ。', 'もうひとさじ、お砂糖を。', 'あと少し甘ければ完璧ですのに。'],
+           ['デザートが甘くないなんて……。', 'これがデザート？ 信じられませんわ。', '甘味がどこにもありませんわ……。']],
+    // デザート以外で甘くない皿（責めない）
+    plain: ['お食事としては結構ですわね。', '甘いものは、まだかしら。', 'デザートが楽しみですわ。'],
+    crowded: ['まあ、にぎやかなお皿ですこと。'],
+    empty: ['あら、お皿だけ？ 甘いものはどこかしら。'],
+    final: [d => `「${d}」の甘さ、とろけるようでしたわ。`,
+            d => `甘いものがもう少し欲しかったですわね。`,
+            d => `デザートに甘さがなくて、がっかりですわ……。`],
+  },
+  'コース構成マニア': {
+    dish: [['この順番でこれ。わかっている。', '構成として完璧な配置だ。', '前の皿からの流れが美しい。'],
+           ['ここで出すには少し違和感が。', '順番を一つずらしたかった。', '構成表に赤を入れたい。'],
+           ['なぜ今これを？', 'この位置にこれは、構成上ありえない。', '流れが、ここで途切れた。']],
+    crowded: ['一皿に詰め込むと、次の皿の役割が消える。'],
+    empty: ['空白の一皿……構成に穴が空いた。'],
+    final: [d => `最初から最後まで、流れが美しい。`,
+            d => `構成に一部、段差を感じる。`,
+            d => `コースとしての流れが破綻している。`],
+  },
+  '旬にうるさい板前': {
+    dish: [['旬の味だ。', () => `いい${S_()}の味がする。`, '季節が皿に乗ってるな。'],
+           ['季節感がもう少し欲しい。', '悪かねえが、季節がぼやけてる。', () => `${S_()}らしさが、あと一つだな。`],
+           ['季節外れだな。', () => `今は${S_()}だぜ。`, '暦を見てから包丁を握りな。']],
+    crowded: ['旬のもんは、少なく盛って活かすもんだ。'],
+    empty: ['……器だけ出すのは、まだ早えな。'],
+    final: [d => `「${d}」、${S_()}の味覚が見事にそろってた。`,
+            d => `季節感がもう一つ。今は${S_()}だ。`,
+            d => `今が${S_()}だってこと、忘れてねえか。`],
+  },
 };
+const say = t => typeof t === 'function' ? t() : t;
 
 function pickGuests(){
   const pool = GUEST_POOL.slice(); guests = [];
@@ -1372,7 +1448,7 @@ function sweetAdj(d, di){
 }
 function reviewCourse(){
   const dishes = SLOTS.map((_, i) => evalDish(slotItems(i), i));
-  const names = SLOTS.map((_, i) => dishName(slotItems(i)));
+  const names = SLOTS.map((_, i) => dishName(slotItems(i), i));
   const flow = evalFlow(dishes);
   const reviews = guests.map(g => {
     const ws = Object.entries(g.w), wsAx = g.sweetTooth ? ws.filter(([ax]) => ax !== 'sweet') : ws;
@@ -1407,7 +1483,7 @@ function reviewCourse(){
       }
     }
     const band = val >= 68 ? 0 : val >= 45 ? 1 : 2;
-    let text = COMMENT[ax][band](dn || 'この料理');
+    let text = VOICE[g.name] ? VOICE[g.name].final[band](dn || 'この料理') : '';
     if (isGranny(g)){
       const bi = per.map((v, i) => [v, i]).filter(([, i]) => dishes[i]).sort((a, b) => b[0] - a[0])[0];
       const gb = score >= 68 ? 0 : score >= 45 ? 1 : 2;
@@ -1473,12 +1549,15 @@ const NAME_OVERRIDE = {
   'fish:potage':{it:'ズッパ', fr:'ビスク',     cn:'羹', jp:'すり流し'},
   'grain:potage':{it:'ミネストラ', fr:'ポタージュ', cn:'粥', jp:'粥'},
 };
+// 茹でる・煮るのが基本の穀物・豆（パスタ・米・麺など）。プリモ・ピアットの「らしい調理」（茹でる・煮る）がこれで選べる
+const STAPLE = new Set(['パスタ', '米', '中華麺', '春雨', 'ポレンタ', 'そば粉', '白玉粉', '餃子の皮', 'あずき', '白いんげん豆', 'レンズ豆', 'タピオカ', '麩']);
 const FORM_LABEL = {block:'塊', cut:'添え', sauce:'ソース', powder:'粉'};
 let _candX = null;
 const cands = p => {
   if (!_candX){ _candX = {}; for (const c of COMBOS) if (c.m) for (const [n, ms] of Object.entries(c.m)){ const base = CANDS[PARAM[n][11]]; if (!ms.some(m => base.includes(m))) (_candX[n] ||= new Set()).add(ms[0]); } }
-  const base = CANDS[prm(p)[11]], x = _candX[ing(p)[1]];
-  return x ? base.concat([...x]) : base;
+  let base = CANDS[prm(p)[11]]; const x = _candX[ing(p)[1]];
+  if (STAPLE.has(ing(p)[1])) base = ['boil', 'stew', ...base.filter(m => m !== 'boil' && m !== 'stew')];
+  return x ? base.concat([...x].filter(m => !base.includes(m))) : base;
 };
 function methodName(p, m = p.method){
   const key = genre.key, ov = NAME_OVERRIDE[prm(p)[11] + ':' + m];
@@ -1520,7 +1599,7 @@ const NAMED = {
   '秋刀魚':     {grill:{jp:'秋刀魚の塩焼き'}},
   'かつお':     {sear:{jp:'かつおのたたき'}, dry:{jp:'かつお節'}},
   'いわし':     {dry:{jp:'いわしの丸干し'}},
-  '白玉粉':     {grill:{jp:'みたらし団子'}},
+  '白玉粉':     {grill:{jp:'みたらし団子'}, boil:{jp:'白玉', cn:'湯圓', it:'ニョッキ風', fr:'白玉'}},
   'みょうが':   {pickle:{jp:'みょうがの甘酢漬け'}},
   '寒天':       {jelly:{jp:'寒天寄せ'}},
   'エストラゴン':{sauce:{fr:'ソース・エストラゴン'}},
@@ -1575,7 +1654,13 @@ const NAMED = {
   'ホタテ':     {sear:{fr:'ホタテのポワレ'}},
   'のり':       {grill:{jp:'焼きのり'}},
   '豆腐':       {raw:{jp:'冷奴'}, boil:{jp:'湯豆腐'}, fry:{jp:'揚げ出し豆腐', cn:'炸豆腐'}, steam:{cn:'蒸し豆腐'}},
-  '米':         {grill:{jp:'焼きおにぎり'}, fry:{it:'アランチーニ', cn:'炒飯', jp:'焼き飯', fr:'ピラフ'}, bake:{fr:'ドリア'}, powder:{jp:'米粉'}},
+  'パスタ':     {boil:{it:'スパゲッティ', fr:'パスタ', cn:'意麺', jp:'スパゲッティ'}, stew:{it:'リゾッタータ', fr:'パスタのブレゼ', cn:'煮込み麺', jp:'スープパスタ'}},
+  '中華麺':     {boil:{cn:'湯麺', jp:'中華そば', it:'タリオリーニ風', fr:'ヌードル'}, stew:{cn:'煮込み麺', jp:'煮込みラーメン'}},
+  'そば粉':     {boil:{jp:'そば', it:'ピッツォッケリ', fr:'そば', cn:'蕎麦麺'}},
+  '春雨':       {boil:{cn:'粉絲', jp:'春雨'}, stew:{cn:'粉絲煲', jp:'春雨の煮物'}},
+  'ポレンタ':   {boil:{it:'ポレンタ'}, stew:{it:'ポレンタ・モルビダ'}},
+  '餃子の皮':   {boil:{cn:'水餃子', jp:'水餃子', it:'ラヴィオリ', fr:'ラヴィオル'}},
+  '米':         {boil:{jp:'ご飯', cn:'白飯', it:'リーゾ・イン・ビアンコ', fr:'ライス'}, stew:{it:'リゾット', fr:'リゾット', cn:'燴飯', jp:'雑炊'}, grill:{jp:'焼きおにぎり'}, fry:{it:'アランチーニ', cn:'炒飯', jp:'焼き飯', fr:'ピラフ'}, bake:{fr:'ドリア'}, powder:{jp:'米粉'}},
   '餅':         {grill:{jp:'焼き餅'}, fry:{jp:'かき餅'}},
   'じゃがいも': {puree:{it:'ニョッキ風', fr:'ポム・ピュレ'}, fry:{fr:'ポム・フリット', jp:'フライドポテト'}, bake:{fr:'グラタン・ドフィノワ'}},
   '玉ねぎ':     {bake:{fr:'オニオングラタン'}, puree:{fr:'スビーズ'}},
@@ -2150,7 +2235,11 @@ function phraseOf(p){
 }
 
 const DECOR = ['記憶','余韻','風景','ささやき','気配'];
-function dishName(items){
+// スープの皿：何のスープかを名前に入れる
+const SOUP_WORD = {fr:'スープ', it:'ズッパ', cn:'スープ', jp:'お椀'};        // ソース・ピュレが汁になるとき
+const BROTH_WORD = {fr:'コンソメ', it:'ブロード', cn:'清湯', jp:'すまし'};   // だしだけのとき（「〜仕立て」）
+const SOUPY = /スープ|汁|ポタージュ|ヴルーテ|ビスク|ブイヤベース|ミネストロ|コンソメ|吸い物|椀|羹|湯|粥|雑炊|鍋|ズッパ|ガスパチョ|ボルシチ|ブロード|チャウダー|ラーメン|そば|うどん|麺|ぜんざい|しるこ|フォー|ちり/;
+function dishName(items, slot = -1){
   if (!items.length) return '';
   assignRoles(items);
   const cb = findCombo(items);
@@ -2166,18 +2255,24 @@ function dishName(items){
     return out.slice(0, max);
   };
   // 定番料理が成立していれば、その名前を頭に
+  const kd = slot >= 0 ? kindOf(slot) : '';
   if (cb){
     const others = grp(rest, 2);
-    return comboTitle(cb.c) + (others.length ? `、${ZW}${j(others)}を添えて` : '');
+    const t = comboTitle(cb.c) + (kd === 'soup' && !SOUPY.test(cb.c.n) ? `の${ZW}${BROTH_WORD[genre.key]}仕立て` : '');
+    return t + (others.length ? `、${ZW}${j(others)}を添えて` : '');
   }
+  if (kd === 'soup') return soupName(rest, grp, j, ph);
   const main = by('main')[0];
   // 主役と同じ調理法の添えは「AとBのグリリア」のように主役とまとめる（「〜を添えて」にしない）
   const mates = main && !phraseOf(main) ? by('side').filter(p => !phraseOf(p) && methodName(p) === methodName(main)) : [];
-  const S = grp(by('side').filter(p => !mates.includes(p)), 2), Q = grp(by('sauce'), 2), P = grp(by('powder'), 1);
+  const isStarch = p => STAPLE.has(ing(p)[1]) || prm(p)[11] === 'grain';
+  const starch = kd === 'primo' && main && !isStarch(main) ? by('side').filter(p => !mates.includes(p) && isStarch(p)) : [];
+  const S = grp(by('side').filter(p => !mates.includes(p) && !starch.includes(p)), 2), Q = grp(by('sauce'), 2), P = grp(by('powder'), 1);
   const QPnames = [...new Set([...by('sauce'), ...by('powder')].map(p => ing(p)[1]))].slice(0, 2);
   const mainNames = main ? [...new Set([main, ...mates].map(p => ing(p)[1]))] : [];
-  const head = !main ? (S.shift() || Q.shift() || P.shift())
+  let head = !main ? (S.shift() || Q.shift() || P.shift())
     : mainNames.length > 1 ? `${mainNames.slice(0, 2).join('と' + ZW)}${mainNames.length > 2 ? 'など' : ''}の${ZW}${methodName(main)}` : ph(main);
+  if (starch.length) head = `${head}を${ZW}のせた${ZW}${grp(starch, 1)[0]}`;   // プリモはパスタ・米が主体の名前に
   const hash = items.reduce((a, p) => a + p.k*31 + p.method.length*7, 0);
   let v = hash % 3;
   if (v === 2 && (!QPnames.length || !main || [...by('sauce'), ...by('powder')].some(p => phraseOf(p)))) v = 0;   // 固有名のソースは名前を出す
@@ -2187,6 +2282,28 @@ function dishName(items){
   return head + (S.length ? `、${ZW}${j(S)}を添えて` : '') + (Q.length ? `　${j(Q)}とともに` : '') + (P.length ? `、${ZW}${j(P)}をまとわせて` : '');
 }
 
+function soupName(rest, grp, j, ph){
+  const isSoupM = p => p.method === 'clear' || p.method === 'potage';
+  const isLiquid = p => p.form === 'sauce' && p.method !== 'foam';
+  const soupM = rest.filter(isSoupM), liquids = rest.filter(p => !isSoupM(p) && isLiquid(p));
+  const solids = rest.filter(p => !isSoupM(p) && !isLiquid(p) && (p.form === 'block' || p.form === 'cut'))
+    .sort((a, b) => (b.role === 'main') - (a.role === 'main'));
+  const foams = grp(rest.filter(p => p.method === 'foam'), 1), P = grp(rest.filter(p => p.form === 'powder'), 1);
+  const floats = grp(solids, 2);
+  let name;
+  if (soupM.length || liquids.length){
+    // 汁そのものが何か：スープの調理法の食材 → なければソース・ピュレの食材
+    const base = soupM.length ? j(grp(soupM, 2))
+      : `${[...new Set(liquids.map(p => ing(p)[1]))].slice(0, 2).join('と' + ZW)}の${ZW}${SOUP_WORD[genre.key]}`;
+    name = floats.length ? `${j(floats)}を${ZW}浮かべた${ZW}${base}` : base;
+  } else if (floats.length){
+    name = `${j(floats)}、${ZW}${BROTH_WORD[genre.key]}仕立て`;      // だしのスープに具が入る
+  } else {
+    const any = [...new Set(rest.map(p => ing(p)[1]))].slice(0, 2);
+    return `${any.join('と' + ZW)}の${ZW}${BROTH_WORD[genre.key]}仕立て`;
+  }
+  return name + (foams.length ? `　${j(foams)}とともに` : '') + (P.length ? `、${ZW}${j(P)}をまとわせて` : '');
+}
 const SLOT_NAMES = {
   fr: ['オードブル', 'ポタージュ', 'ポワソン', 'ヴィヤンド', 'デセール'],
   it: ['アンティパスト', 'プリモ・ピアット', 'セコンド・ピアット', 'コントルノ', 'ドルチェ'],
@@ -2243,7 +2360,7 @@ let introTimer = 0;
 function startGuestIntro(){
   const bar = serveEl.querySelector('.intro .intro-bar'); if (!bar) return;
   bar.classList.add('run'); clearTimeout(introTimer);
-  introTimer = setTimeout(closeServe, INTRO_MS);
+  introTimer = setTimeout(() => { if (serveEl.querySelector('.intro')) closeServe(); }, INTRO_MS);   // 紹介がまだ出ているときだけ閉じる
 }
 const INTRO_MS = 5200;
 window.__introStart = startGuestIntro;
@@ -2279,13 +2396,13 @@ function renderPanel(){
     const amt = d.portion >= 70 ? '適量' : d.amountDir > 0 ? '多め' : '少なめ';
     html += `<div class="slot cur"><h2><span>${slotName(curSlot)}<wbr>（${slotGen(curSlot)}）</span>` +
       `<span style="white-space:nowrap">${items.length}品　量 <span class="mark">${amt}</span>　まとまり <span class="mark">${mk}</span></span></h2>` +
-      `<div class="chips">${items.map(chipHTML).join('')}</div>` + pickerHTML(items) + `<div class="dish">${dishName(items)}</div>` + recipeHelpHTML(items) + `</div>` +
+      `<div class="chips">${items.map(chipHTML).join('')}</div>` + pickerHTML(items) + `<div class="dish">${dishName(items, curSlot)}</div>` + recipeHelpHTML(items) + `</div>` +
       `<button class="btn" id="serveBtn">お出しする</button>`;
   }
   // コースの進み具合
   html += `<div class="course">` + SLOTS.map((g, i) => {
     const items = slotItems(i), st = i < curSlot || (i === curSlot && phase === 'done') ? 'done' : i === curSlot ? 'now' : '';
-    return `<div class="crow ${st}"><span class="cn">${slotName(i)}</span><span class="cd">${st === 'done' ? (dishName(items) || '—') : i === curSlot ? 'いまここ' : ''}</span></div>`;
+    return `<div class="crow ${st}"><span class="cn">${slotName(i)}</span><span class="cd">${st === 'done' ? (dishName(items, i) || '—') : i === curSlot ? 'いまここ' : ''}</span></div>`;
   }).join('') + `</div>`;
   panel.innerHTML = html;
 }
@@ -2456,33 +2573,22 @@ recEl.addEventListener('input', e => {
 recEl.addEventListener('change', e => { if (e.target.id === 'rbSort'){ rb.sort = e.target.value; renderRecipeList(); } });
 
 // ---------- 提供パート：1皿ずつ運ぶ ----------
-const SHORT = {
-  harm:  ['味がきれいにまとまっている。', '悪くないが、もう一歩。', '味が喧嘩している……。'],
-  fit:   ['この順番でこれ。わかっている。', 'ここで出すには少し違和感が。', 'なぜ今これを？'],
-  flow:  ['この順番でこれ。わかっている。', 'ここで出すには少し違和感が。', 'なぜ今これを？'],
-  genre: [() => `実に${genre.name}らしい。`, () => `${genre.name}……なのか？`, () => `これは${genre.name}ではない。`],
-  lux:   ['贅沢な素材だ。', 'もう少し良い素材を。', 'ずいぶん庶民的だな。'],
-  vol:   ['ボリューム満点！', 'もうちょっと食べたい。', 'え、これだけ？'],
-  odd:   ['この混沌、素晴らしい！', 'まだ常識的だね。', '退屈だ。'],
- portion: ['ちょうどいい量だ。', d => d.amountDir > 0 ? '少し量が多いね。' : '少し量が物足りない。', d => d.amountDir > 0 ? 'こんなに食べきれないよ。' : 'え、これだけ？'],
- season: ['旬の味だ。', '季節感がもう少し欲しい。', '季節外れだな。'],
-  sweet: ['甘くて幸せ……。', '甘さが少し足りないわ。', '甘くないわね……。'],
-};
 const moodOf = s => s >= 70 ? 0 : s >= 50 ? 1 : s >= 35 ? 2 : 3;
 
 function dishComment(R2, di){
   const d = R2.dishes[di];
-  if (!d) return {g: guests[0], text: isGranny(guests[0]) ? pickOne(GRANNY.empty) : '……皿が、空なのだが？'};
+  if (!d){ const g0 = guests[Math.floor(Math.random() * guests.length)];
+    return {g: g0, text: isGranny(g0) ? pickOne(GRANNY.empty) : say(pickOne(VOICE[g0.name].empty))}; }
   // いちばん反応が大きい客が一言
   let gi = 0, best = -1;
   R2.reviews.forEach((r, i) => { const dev = Math.abs(r.per[di] - 55) + Math.random()*6 - (i === lastGi ? 12 : 0); if (dev > best){ best = dev; gi = i; } });
   const g = guests[gi]; lastGi = gi;
-  let ax = Object.entries(g.w).sort((a,b) => b[1]-a[1])[0][0];
-  if (ax === 'sweet' && !isDessertSlot(di) && d.sweet < 45) ax = 'harm';   // 甘党：デザート以外で甘くない皿は、味のまとまりで語る（責めない）
+  const ax = Object.entries(g.w).sort((a,b) => b[1]-a[1])[0][0], V = VOICE[g.name];
   const val = ax === 'flow' ? d.fit : d[ax];
   const band = val >= 68 ? 0 : val >= 45 ? 1 : 2;
-  let t = SHORT[ax][band]; if (typeof t === 'function') t = t(d);
-  if (d.notes.includes('品数過多') && Math.random() < 0.5) t = '皿の上が、渋滞している。';
+  let t = V ? say(pickOne(V.dish[band])) : '';
+  if (V && V.plain && !isDessertSlot(di) && d.sweet < 45) t = pickOne(V.plain);   // 甘党：デザート以外で甘くない皿は責めない
+  if (V && d.notes.includes('品数過多') && Math.random() < 0.5) t = say(pickOne(V.crowded));
   if (isGranny(g)){   // おばあちゃんは自分の評価で話し、悪いときもフォローする
     const v = R2.reviews[gi].per[di], gb = v >= 68 ? 0 : v >= 45 ? 1 : 2;
     t = d.notes.includes('品数過多') && Math.random() < 0.5 ? pickOne(GRANNY.crowded) : pickOne(GRANNY.dish[gb]);
@@ -2570,7 +2676,7 @@ const serveEl = document.getElementById('serve');
 function openServe(html){
   serveEl.innerHTML = html; serveEl.style.display = 'block'; document.body.style.overflow = 'hidden'; serveEl.scrollTop = 0;
 }
-function closeServe(){ serveEl.style.display = 'none'; document.body.style.overflow = ''; }
+function closeServe(){ clearTimeout(introTimer); serveEl.style.display = 'none'; document.body.style.overflow = ''; }
 
 // 1皿出すごとに、その場で一言もらう
 function serveDish(){
@@ -2615,9 +2721,11 @@ function starsHTML(sc, k){
     `<span style="width:${st/5*100}%;background-image:url(${starImg(k, true)});background-size:${w}px ${h}px"></span></span>`;
 }
 const GOOD_NOTE = /定番|らしい調理|取り合わせ|素材を活かした|が良い|引き立てる|締める/;
+// グラフの色は項目ごとに固定（点の高低では変えない）
+const BAR_COLOR = {'完成度':'#b5452f', '適合':'#3f6f9e', '量':'#d99a2b', 'らしさ':'#7a4f9a', '旬':'#5e9a4a', 'コースの流れ':'#5a1e2a'};
 function barRow(label, v){
-  const x = Math.round(clamp(v)), cls = x >= 68 ? '' : x >= 45 ? 'mid' : 'low';
-  return `<span>${label}</span><span class="rbar"><i class="${cls}" style="width:${x}%"></i></span><span class="v">${x}</span>`;
+  const x = Math.round(clamp(v));
+  return `<span>${label}</span><span class="rbar"><i style="width:${x}%;background:${BAR_COLOR[label] || '#7a6a5a'}"></i></span><span class="v">${x}</span>`;
 }
 function showFinal(){
   const R2 = reviewCourse();

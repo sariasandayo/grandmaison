@@ -280,10 +280,21 @@
   .rfind .pxi{width:18px;height:18px}
   /* ===== 1画面に収めるレイアウト ===== */
   .wrap{padding-top:10px!important}
-  #round{display:flex!important;align-items:center;justify-content:space-between;gap:8px;padding:6px 8px!important;margin:6px 0 6px!important}
-  #round .g{font-size:12px;line-height:1.4}
-  .gmini{display:flex;gap:2px;border:0;background:none;padding:0;cursor:pointer;flex:none}
-  .pxface.sm{width:26px;height:26px}
+  #round{display:grid!important;grid-template-columns:1.15fr 1fr auto;align-items:center;padding:8px 6px!important;margin:6px 0 6px!important}
+  #round .rdi,.gmini{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;line-height:1.15;padding:0 6px}
+  #round .rdi + .rdi,.gmini{border-left:1px dotted var(--line)}
+  #round small,.gmini small{font-size:10.5px;color:var(--sub);font-weight:700;letter-spacing:.04em}
+  #round .rdi b{font-size:18px;font-weight:800;color:var(--accent);display:flex;align-items:center;white-space:nowrap}
+  #round .rdi .pxi{width:22px;height:22px;margin:0 3px 0 0}
+  .gmini{border:0;background:none;cursor:pointer;font-family:inherit;padding-left:10px}
+  .gmini span{display:flex;gap:2px}
+  .pxface.sm{width:28px;height:28px}
+  .intro{cursor:pointer;min-height:100vh;min-height:100dvh}
+  .intro-go{display:flex;flex-direction:column;align-items:center;gap:8px;font-size:12.5px;color:var(--sub);font-weight:700;margin:4px 0 8px}
+  .intro-bar{width:70%;height:8px;background:#e6dccb;box-shadow:0 -2px 0 0 var(--line),0 2px 0 0 var(--line),-2px 0 0 0 var(--line),2px 0 0 0 var(--line)}
+  .intro-bar i{display:block;height:100%;width:0;background:#b5452f}
+  .intro-bar.run i{animation:introBar 5.2s linear forwards}
+  @keyframes introBar{to{width:100%}}
   .hold-note{margin:-4px 0 8px!important;line-height:1.5}
   .bar{margin:8px 0 8px!important}
   #guestBox{margin-top:16px}
@@ -874,23 +885,71 @@ const inGate = a => { let d = Math.atan2(Math.sin(a - GA), Math.cos(a - GA)); re
 function layer(fn){ const c = document.createElement('canvas'); c.width = LW; c.height = LH; const g = c.getContext('2d'); fn(g, (x, y, w, h, col) => { g.fillStyle = col; g.fillRect(x, y, w, h); }); return c; }
 // 背面：台・取り出し口・受け皿・ガラス
 const BACK = layer((g, F) => {
-  // 台（台形）
-  const top = Math.round(374/PSZ), bot = Math.round(398/PSZ);
-  for (let y = top; y <= bot; y++){
-    const t = (y - top) / (bot - top), hw = Math.round((110 + 40*t) / PSZ);
-    F(Math.round(LCX) - hw, y, hw*2, 1, y === top ? '#e8d4b4' : y === bot ? '#6e4a2a' : '#c8a878');
-    F(Math.round(LCX) - hw - 1, y, 1, 1, '#6e4a2a'); F(Math.round(LCX) + hw, y, 1, 1, '#6e4a2a');
+  const cx = Math.round(LCX), top = Math.round(372/PSZ), bot = Math.round(398/PSZ);
+  const WD = ['#4a2a1a', '#6e4028', '#8c5634', '#a86c42'], GD = ['#8a5a14', '#c8902a', '#f0c850', '#fff0a8'];
+  // 真鍮の受け台（球の下を両側から抱える）と脚
+  const legX = Math.round((LR + 7) * Math.sin(1.0));
+  for (let y = Math.floor(LCY + 30); y <= top; y++) for (let x = cx - legX - 6; x <= cx + legX + 6; x++){
+    const dx = x + .5 - LCX, dy = y + .5 - LCY, d = Math.hypot(dx, dy);
+    const off = Math.abs(Math.atan2(Math.abs(dx), dy));       // 真下からの角度
+    if (off > 0.30 && off < 1.0 && d >= LR + 4.5 && d <= LR + 10){
+      F(x, y, 1, 1, (d < LR + 5.5 || d > LR + 9) ? K0 : d < LR + 7 ? GD[2] : GD[1]);
+    }
   }
-  for (let x = Math.round(LCX) - 70; x < Math.round(LCX) + 70; x += 8) F(x, top + 6, 4, 1, '#b08a5a');
-  // 取り出し口
-  const gw = Math.round(Math.sin(GATE) * LR) - 1, gy = Math.round(LCY + LR*0.96);
-  F(Math.round(LCX) - gw, gy, gw*2, bot - gy, '#3a2a22'); F(Math.round(LCX) - gw + 1, gy, gw*2 - 2, bot - gy, '#5a4636');
-  // 受け皿
+  for (const sgn of [-1, 1]){
+    const x0 = cx + sgn * legX, y0 = Math.round(LCY + (LR + 7) * Math.cos(1.0));
+    F(x0 - 3, y0, 7, top - y0, K0); F(x0 - 2, y0, 5, top - y0, GD[1]); F(x0 - 1 - (sgn > 0 ? 0 : -1), y0, 1, top - y0, GD[3]); F(x0 + (sgn > 0 ? 1 : -2), y0, 1, top - y0, GD[0]);
+    F(x0 - 4, top - 3, 9, 3, K0); F(x0 - 3, top - 2, 7, 1, GD[2]);                    // 脚の座金
+    F(x0 - 4, y0 - 1, 9, 3, K0); F(x0 - 3, y0, 7, 1, GD[2]);
+  }
+  // 木の台座（2段。上は細い笠木、下は鏡板の入った胴）
+  const capHW = legX + 10, bodyHW = legX + 7;
+  F(cx - capHW, top, capHW * 2, 5, K0);
+  F(cx - capHW + 1, top + 1, capHW * 2 - 2, 1, WD[3]); F(cx - capHW + 1, top + 2, capHW * 2 - 2, 2, WD[2]);
+  F(cx - capHW + 1, top + 4, capHW * 2 - 2, 1, GD[2]);
+  F(cx - bodyHW, top + 5, bodyHW * 2, bot - top - 4, K0);
+  F(cx - bodyHW + 1, top + 5, bodyHW * 2 - 2, bot - top - 6, WD[1]);
+  F(cx - bodyHW + 1, top + 5, bodyHW * 2 - 2, 1, WD[0]);
+  // 鏡板（左右に2枚ずつ）
+  const gw = Math.round(Math.sin(GATE) * LR) + 2, pw = Math.floor((bodyHW - gw - 6) / 2) - 2;
+  for (const sgn of [-1, 1]) for (let k = 0; k < 2; k++){
+    const x0 = sgn > 0 ? cx + gw + 4 + k * (pw + 3) : cx - gw - 4 - (k + 1) * pw - k * 3;
+    F(x0, top + 7, pw, bot - top - 11, WD[0]); F(x0 + 1, top + 8, pw - 1, bot - top - 12, WD[2]); F(x0 + 1, top + 8, pw - 1, 1, WD[3]);
+    F(x0 + Math.floor(pw / 2) - 1, top + Math.floor((bot - top) / 2) + 1, 2, 2, GD[2]);   // 鋲
+  }
+  F(cx - bodyHW + 1, bot - 2, bodyHW * 2 - 2, 1, GD[1]);
+  // 取り出し口（真鍮の縁の付いたシュート）
+  const gy = Math.round(LCY + LR * 0.96);
+  F(cx - gw - 1, gy, gw * 2 + 2, bot - gy, K0);
+  F(cx - gw, gy, 1, bot - gy, GD[2]); F(cx + gw - 1, gy, 1, bot - gy, GD[0]);
+  F(cx - gw + 1, gy, gw * 2 - 2, bot - gy, '#2e2018'); F(cx - gw + 2, gy, gw * 2 - 4, bot - gy - 2, '#43301f');
+  F(cx - gw - 2, top + 4, gw * 2 + 4, 2, K0); F(cx - gw - 1, top + 4, gw * 2 + 2, 1, GD[3]);
+  // 受け皿：取っ手の付いた銀のトレー、中にリネン
   const tl = Math.round((TRAY.l-3)/PSZ), tr = Math.round((TRAY.r+3)/PSZ), tt = Math.round(TRAY.top/PSZ), tb = Math.round((TRAY.floor+4)/PSZ);
+  const SV = ['#5a6676', '#8a96a6', '#c4ccd6', '#eef2f6'];
+  const hy = Math.round((tt + tb) / 2) - 6;
+  for (const [hx, dir] of [[tl - 6, 1], [tr, -1]]){                                   // 取っ手
+    const hx2 = dir > 0 ? hx - 3 : hx; 
+    F(hx2, hy - 3, 10, 18, K0); F(hx2 + 1, hy - 2, 8, 16, SV[2]); F(hx2 + 1, hy - 2, 8, 1, SV[3]); F(hx2 + 1, hy + 13, 8, 1, SV[0]);
+    F(hx2 + 3, hy + 1, 4, 10, K0); F(hx2 + 4, hy + 2, 2, 8, '#efe9de');
+  }
   F(tl+2, tt, tr-tl-4, tb-tt, K0); F(tl, tt+2, tr-tl, tb-tt-4, K0); F(tl+1, tt+1, tr-tl-2, tb-tt-2, K0);
-  F(tl+2, tt+2, tr-tl-4, tb-tt-4, '#c8a878'); F(tl+4, tt+4, tr-tl-8, tb-tt-8, '#fbf4e4');
-  F(tl+4, tt+4, tr-tl-8, 2, '#e8dcc4'); F(tl+4, tb-5, tr-tl-8, 1, '#f4ead4');
-  for (let x = tl+6; x < tr-6; x += 6) F(x, tb-3, 3, 1, '#a8885a');
+  F(tl+2, tt+1, tr-tl-4, tb-tt-2, SV[2]); F(tl+1, tt+2, tr-tl-2, tb-tt-4, SV[2]);
+  F(tl+2, tt+1, tr-tl-4, 1, SV[3]); F(tl+1, tt+2, 1, tb-tt-5, SV[3]);                 // 縁の光
+  F(tl+2, tb-2, tr-tl-4, 1, SV[0]); F(tr-2, tt+3, 1, tb-tt-5, SV[1]);                 // 縁の影
+  F(tl+4, tt+4, tr-tl-8, tb-tt-8, SV[0]);                                              // 内側の段
+  F(tl+5, tt+5, tr-tl-10, tb-tt-10, '#fbf6ec');
+  F(tl+5, tt+5, tr-tl-10, 2, '#e4d9c6'); F(tl+5, tt+7, tr-tl-10, 1, '#efe6d6');       // 奥の影
+  for (let y = tt + 10; y < tb - 6; y += 4) for (let x = tl + 7 + (y % 8 ? 2 : 0); x < tr - 7; x += 4) F(x, y, 1, 1, '#ede3d0');   // 布目
+  // リネンの縁：赤いギンガムの帯
+  const bx0 = tl + 5, bx1 = tr - 5, by0 = tt + 5, by1 = tb - 5, bw = 4;
+  for (let y = by0; y < by1; y++) for (let x = bx0; x < bx1; x++){
+    if (x >= bx0 + bw && x < bx1 - bw && y >= by0 + bw && y < by1 - bw) continue;
+    const a = Math.floor((x - bx0) / 2) % 2, b = Math.floor((y - by0) / 2) % 2;
+    F(x, y, 1, 1, a && b ? '#b5452f' : a || b ? '#e08a74' : '#fbf6ec');
+  }
+  F(bx0 + bw, by0 + bw, bx1 - bx0 - bw*2, 1, '#e4d9c6');
+  F(tl+5, tb-6, tr-tl-10, 1, '#efe6d6');
   // ガラス（中の背景）
   for (let y = Math.floor(LCY - LR); y <= LCY + LR; y++) for (let x = Math.floor(LCX - LR); x <= LCX + LR; x++){
     const d = Math.hypot(x + .5 - LCX, y + .5 - LCY); if (d > LR) continue;
@@ -1254,7 +1313,7 @@ const GUEST_POOL = [
   {face:'💰', name:'成金社長', tag:'高級食材が好き', w:{lux:3, vol:1, harm:1, fit:1}},
   {face:'🎒', name:'腹ペコの学生', tag:'量があれば満足', w:{vol:3, harm:1, fit:0.5}},
   {face:'🎨', name:'前衛アーティスト', tag:'奇妙な皿ほど喜ぶ', w:{odd:3, harm:0.5}},
-  {face:'🍰', name:'甘党のマダム', tag:'甘いものに目がない', w:{sweet:2, harm:1, fit:1.5}},
+  {face:'🍰', name:'甘党のマダム', tag:'甘いものに目がない', w:{sweet:2, harm:1, fit:1.5}, sweetTooth:true},
   {face:'📋', name:'コース構成マニア', tag:'流れを重視', w:{flow:3, fit:3, portion:1}},
   {face:'🔪', name:'旬にうるさい板前', tag:'季節の食材を重んじる', w:{season:3, harm:1, fit:1, portion:0.5}},
   {face:'👵', name:'近所のおばあちゃん', tag:'たいてい褒めてくれる', w:{harm:1, fit:1.5, genre:1, portion:1.5}, bonus:6},
@@ -1305,27 +1364,38 @@ function pickGuests(){
 function quality(d){ return (d.harm*0.45 + d.fit*0.55) / 100; }
 function qualityGate(d){ return Math.min(1, Math.max(0.08, (quality(d) - 0.25) / 0.5)); }
 const isOddLover = g => (g.w.odd || 0) >= 3;
+// 甘党：デザート以外は甘いほど加点（甘くなくても減点なし）、デザートは甘くないと減点
+const isDessertSlot = di => kindOf(di) === 'dessert';
+function sweetAdj(d, di){
+  if (!isDessertSlot(di)) return Math.max(0, d.sweet - 20) * 0.3;        // 甘さ20を超えたぶん、最大＋24
+  return d.sweet >= 55 ? (d.sweet - 55) * 0.25 : -(55 - d.sweet) * 0.9;  // デザート：甘ければ最大＋11、甘くなければ最大−50
+}
 function reviewCourse(){
   const dishes = SLOTS.map((_, i) => evalDish(slotItems(i), i));
   const names = SLOTS.map((_, i) => dishName(slotItems(i)));
   const flow = evalFlow(dishes);
   const reviews = guests.map(g => {
-    const ws = Object.entries(g.w), wsum = ws.reduce((a,[,w]) => a+w, 0);
+    const ws = Object.entries(g.w), wsAx = g.sweetTooth ? ws.filter(([ax]) => ax !== 'sweet') : ws;
+    const wsum = wsAx.reduce((a,[,w]) => a+w, 0);
     let total = 0; const per = [];
     dishes.forEach((d, di) => {
       let s = 0;
-      for (const [ax, w] of ws) s += (ax === 'flow' ? flow : (d ? d[ax] : 0)) * w;
+      for (const [ax, w] of wsAx) s += (ax === 'flow' ? flow : (d ? d[ax] : 0)) * w;
       // 料理の出来（味のまとまり×コースへの適合）が悪いと、ほかの軸がよくても点は伸びない
       // 奇抜さを最も重視する客（前衛アーティスト）だけは関門なし
       const gate = isOddLover(g) ? 0.6 + 0.4*qualityGate(d || {harm:0, fit:0}) : qualityGate(d || {harm:0, fit:0});
-      const ds = d ? clamp((s / wsum * 1.2 + 6) * gate + (g.bonus||0)) : 0;
+      let ds = d ? clamp((s / wsum * 1.2 + 6) * gate + (g.bonus||0)) : 0;
+      if (d && g.sweetTooth) ds = clamp(ds + sweetAdj(d, di));
       total += ds; per[di] = Math.round(ds);
     });
     let score = clamp(total / dishes.length);
     // 最も重視する軸でコメント
     const [ax] = ws.sort((a,b) => b[1]-a[1])[0];
     let val, dn = '';
-    if (ax === 'flow' || ax === 'genre' || ax === 'portion'){
+    if (g.sweetTooth){
+      const di = dishes.findIndex((d, i) => d && isDessertSlot(i));
+      val = di >= 0 ? dishes[di].sweet : 0; dn = di >= 0 ? names[di] : '';
+    } else if (ax === 'flow' || ax === 'genre' || ax === 'portion'){
       val = ax === 'flow' ? flow : dishes.reduce((a,d) => a + (d ? d[ax] : 0), 0) / dishes.length;
     } else {
       const idx = dishes.map((d,i) => d ? i : -1).filter(i => i >= 0);
@@ -2151,24 +2221,34 @@ const AXIS_WORD = {harm:'味のまとまり', fit:'コースとの合い方', ge
 const guestFocus = g => Object.entries(g.w).sort((a, b) => b[1] - a[1]).slice(0, 2).map(([k]) => AXIS_WORD[k]).join('・');
 function renderRound(){
   document.getElementById('round').innerHTML =
-    `<div class="g">本日のお題：<b>${genre.name}</b>　季節：<b>${ICON.seasonImg(season)}${season.name}</b></div>` +
-    `<button class="gmini" id="guestMini" aria-label="本日のお客さま">${guests.map(g => ICON.faceImg(g, 1, 'pxface sm')).join('')}</button>`;
+    `<div class="rdi"><small>本日のお題</small><b>${genre.name}</b></div>` +
+    `<div class="rdi"><small>季節</small><b>${ICON.seasonImg(season)}${season.name}</b></div>` +
+    `<button class="gmini" id="guestMini" aria-label="本日のお客さま"><small>お客さま</small><span>${guests.map(g => ICON.faceImg(g, 1, 'pxface sm')).join('')}</span></button>`;
   document.getElementById('guestBox').innerHTML = `<div class="gb-h">本日のお客さま</div><div class="guests">${guests.map(guestCard).join('')}</div>`;
   resize();
 }
 // 営業の始めに「本日のお客さま」を紹介する
-function showGuestIntro(){
+function showGuestIntro(auto = false){
   openServe(`<div class="sv intro">
     <div class="res-head"><div class="rh-t">本日のお客さま</div><div class="rh-s">お題：${genre.name}・${ICON.seasonImg(season)}${season.name}</div></div>
     <div class="intro-list">${guests.map(g => { const [pre, noun] = GUEST_LABEL[g.name] || ['', g.name];
       return `<div class="ig">${ICON.faceImg(g, 1, 'pxface big')}<div><div class="ig-n"><small>${pre}</small>${noun}</div><div class="ig-t">${GUEST_TAG_WRAP[g.name] || g.tag}</div>
         <div class="ig-f">重視すること：<b>${guestFocus(g)}</b></div></div></div>`; }).join('')}</div>
-    <button class="btn" id="introOk">厨房へ</button>
+    <div class="intro-go"><div class="intro-bar"><i></i></div><span>${auto ? 'まもなく開店…（タップで厨房へ）' : 'タップで閉じる'}</span></div>
   </div>`);
-  document.getElementById('introOk').onclick = closeServe;
+  serveEl.querySelector('.intro').onclick = () => { clearTimeout(introTimer); closeServe(); };
 }
-function newRound(){ genre = GENRES[Math.floor(Math.random()*GENRES.length)]; season = SEASONS[Math.floor(Math.random()*SEASONS.length)]; pickGuests(); renderRound(); showGuestIntro(); }
-document.getElementById('round').addEventListener('click', e => { if (e.target.closest('#guestMini')) showGuestIntro(); });
+// 扉が開いたら、少し見せてから自動で厨房へ
+let introTimer = 0;
+function startGuestIntro(){
+  const bar = serveEl.querySelector('.intro .intro-bar'); if (!bar) return;
+  bar.classList.add('run'); clearTimeout(introTimer);
+  introTimer = setTimeout(closeServe, INTRO_MS);
+}
+const INTRO_MS = 5200;
+window.__introStart = startGuestIntro;
+function newRound(){ genre = GENRES[Math.floor(Math.random()*GENRES.length)]; season = SEASONS[Math.floor(Math.random()*SEASONS.length)]; pickGuests(); renderRound(); showGuestIntro(true); }
+document.getElementById('round').addEventListener('click', e => { if (e.target.closest('#guestMini')) showGuestIntro(false); });
 
 // この皿で作れる定番料理：成立中なら表示、調理法が足りなければワンタップで合わせるボタン
 function recipeHelpHTML(items){
@@ -2398,7 +2478,7 @@ function dishComment(R2, di){
   R2.reviews.forEach((r, i) => { const dev = Math.abs(r.per[di] - 55) + Math.random()*6 - (i === lastGi ? 12 : 0); if (dev > best){ best = dev; gi = i; } });
   const g = guests[gi]; lastGi = gi;
   let ax = Object.entries(g.w).sort((a,b) => b[1]-a[1])[0][0];
-  if (ax === 'sweet' && di !== 4) ax = 'harm';   // 甘党もデザート以外は味のまとまりで語る
+  if (ax === 'sweet' && !isDessertSlot(di) && d.sweet < 45) ax = 'harm';   // 甘党：デザート以外で甘くない皿は、味のまとまりで語る（責めない）
   const val = ax === 'flow' ? d.fit : d[ax];
   const band = val >= 68 ? 0 : val >= 45 ? 1 : 2;
   let t = SHORT[ax][band]; if (typeof t === 'function') t = t(d);
@@ -2774,7 +2854,7 @@ const DOORS = (() => {
   }
   draw();
   const title = document.getElementById('title');
-  document.getElementById('startBtn').onclick = () => DOORS.open(() => { title.classList.add('hide'); window.scrollTo(0, 0); });
+  document.getElementById('startBtn').onclick = () => DOORS.open(() => { title.classList.add('hide'); window.scrollTo(0, 0); if (window.__introStart) window.__introStart(); });
   window.__closeShop = () => DOORS.close(() => { if (window.__gameReset) window.__gameReset(); title.classList.remove('hide'); title.scrollTop = 0; });
   document.getElementById('titleRecipe').onclick = () => document.getElementById('recipeBtn').click();
 })();

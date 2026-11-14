@@ -289,6 +289,8 @@
   .gmini{border:0;background:none;cursor:pointer;font-family:inherit;padding-left:10px}
   .gmini span{display:flex;gap:2px}
   .pxface.sm{width:28px;height:28px}
+  .backbox{margin-top:22px;text-align:center}
+  .backbox p{font-size:11.5px;color:var(--sub);margin:8px 0 0}
   .intro{cursor:pointer;min-height:100vh;min-height:100dvh}
   .intro-go{display:flex;flex-direction:column;align-items:center;gap:8px;font-size:12.5px;color:var(--sub);font-weight:700;margin:4px 0 8px}
   .intro-bar{width:70%;height:8px;background:#e6dccb;box-shadow:0 -2px 0 0 var(--line),0 2px 0 0 var(--line),-2px 0 0 0 var(--line),2px 0 0 0 var(--line)}
@@ -367,6 +369,7 @@
   <div id="panel"></div>
   <div id="summary"></div>
   <div id="guestBox"></div>
+  <div class="backbox"><button class="btn ghost" id="toTitle">タイトルへ戻る</button><p>※進行は保存されません。タイトルへ戻ると、今回の営業は最初からになります。</p></div>
 </div>
 <div id="serve"></div>
 <div id="recipes"></div>
@@ -2365,6 +2368,7 @@ function startGuestIntro(){
 const INTRO_MS = 5200;
 window.__introStart = startGuestIntro;
 function newRound(){ genre = GENRES[Math.floor(Math.random()*GENRES.length)]; season = SEASONS[Math.floor(Math.random()*SEASONS.length)]; pickGuests(); renderRound(); showGuestIntro(true); }
+document.getElementById('toTitle').onclick = () => { if (window.__closeShop) window.__closeShop(); else reset(); };
 document.getElementById('round').addEventListener('click', e => { if (e.target.closest('#guestMini')) showGuestIntro(false); });
 
 // この皿で作れる定番料理：成立中なら表示、調理法が足りなければワンタップで合わせるボタン
@@ -2748,7 +2752,7 @@ function showFinal(){
     <button class="btn ghost" id="svclose" style="margin-top:14px">閉店する（タイトルへ）</button>
   </div>`);
   SLOTS.forEach((g, j) => { const cv = document.getElementById('resPlate' + j); if (cv) drawPlateArt(cv, slotItems(j), j); });
-  document.getElementById('svnext').onclick = () => { closeServe(); reset(); };
+  document.getElementById('svnext').onclick = () => { closeServe(); reset(); startGuestIntro(); };   // 次の営業：紹介を出して自動で厨房へ
   document.getElementById('svclose').onclick = () => { if (window.__closeShop) window.__closeShop(); else { closeServe(); reset(); } };
 }
 
